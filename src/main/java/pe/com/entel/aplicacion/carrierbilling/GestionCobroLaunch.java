@@ -68,14 +68,14 @@ public class GestionCobroLaunch {
                     .addString("dateProcesoStr", dateProcess)
                     .toJobParameters();
 
-            String params1= jobParameters1.toString();
+            String params1 = jobParameters1.toString();
             params1 = StringUtils.substring(params1, 1, params1.length() - 1);
 
             jobOperator.start(jobName1, params1);
 
             TimeUnit.SECONDS.sleep(10);
 
-            logger.debug("Esperando 10 sec...");
+            logger.debug("Esperando 20 sec...");
 
         } catch (Exception e) {
             logger.error(e);

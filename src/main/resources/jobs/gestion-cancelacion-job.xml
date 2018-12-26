@@ -44,7 +44,7 @@
                     </constructor-arg>
                 </bean>
                 <bean class="org.springframework.jdbc.core.SqlOutParameter">
-                    <constructor-arg index="0" value="AVCH_MENSAJE"/>
+                    <constructor-arg index="0" value="AVCH_MENSAJ   E"/>
                     <constructor-arg index="1">
                         <util:constant static-field="oracle.jdbc.OracleTypes.VARCHAR"/>
                     </constructor-arg>
