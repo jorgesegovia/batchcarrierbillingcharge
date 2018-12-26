@@ -60,7 +60,7 @@ public class GestionCobroLaunch {
 
             TimeUnit.SECONDS.sleep(10);
 
-            logger.debug("Esperando 30 sec...");
+            logger.debug("Esperando 40 sec...");
 
             String jobName1 = "gestionCancelacionJob";
 
