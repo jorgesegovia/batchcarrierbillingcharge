@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.2.xsd http://www.springframework.org/schema/oxm http://www.springframework.org/schema/oxm/spring-oxm.xsd">
+
+    <context:component-scan base-package="pe.com.entel.aplicacion.carrierbilling"/>
+    <context:annotation-config/>
+
+    <bean id="promotionListener"
+          class="org.springframework.batch.core.listener.ExecutionContextPromotionListener">
+        <property name="keys">
+            <array>
+                <value>total_paginas</value>
+                <value>pagina_actual</value>
+                <value>id_bill_control</value>
+                <value>suscripcion_ok</value>
+                <value>suscripcion_error</value>
+                <value>suscripcion_reintento</value>
+            </array>
+        </property>
+        <property name="statuses">
+            <array>
+                <value>REPEAT</value>
+                <value>COMPLETED</value>
+                <value>NO_SUSCRIPTIONS</value>
+            </array>
+        </property>
+    </bean>
+
+    <batch:job id="gestionCobroJob" restartable="true" job-repository="jobRepository">
+        <batch:step id="inicioCobroStep" parent="inicioCobroStepParent">
+            <batch:next on="COMPLETED" to="procesoCobroStep"/>
+            <batch:next on="NO_SUSCRIPTIONS" to="findCobroStep"/>
+            <batch:end on="FAILED"/>
+        </batch:step>
+        <batch:step id="procesoCobroStep" parent="procesoCobroStepParent">
+            <batch:next on="REPEAT" to="procesoCobroStep"/>
+            <batch:next on="COMPLETED" to="findCobroStep"/>
+            <batch:end on="FAILED"/>
+        </batch:step>
+        <batch:step id="findCobroStep" parent="findCobroStepParent">
+            <batch:end on="COMPLETED"/>
+        </batch:step>
+    </batch:job>
+
+    <!-- Step 1-->
+    <batch:step id="inicioCobroStepParent">
+        <batch:tasklet ref="inicioCobroTasklet">
+            <batch:listeners>
+                <batch:listener ref="inicioCobroStepListener"/>
+                <batch:listener ref="promotionListener"/>
+            </batch:listeners>
+        </batch:tasklet>
+    </batch:step>
+
+    <bean id="inicioCobroTasklet" class="pe.com.entel.aplicacion.carrierbilling.jobs.tasklet.InicioGestionCobroTasklet"
+          scope="step">
+        <property name="procedure" ref="regCobroPendienteStoreProcedure"/>
+        <property name="dateProcesoStr" value="#{jobParameters[dateProcesoStr]}"/>
+        <property name="creadoPor" value="${carbill.app.creadorPor}"/>
+    </bean>
+
+    <bean id="inicioCobroStepListener"
+          class="pe.com.entel.aplicacion.carrierbilling.jobs.listener.InicioCobroStepListener"
+          scope="step"/>
+
+    <!-- Step 2-->
+    <batch:step id="procesoCobroStepParent">
+        <batch:tasklet transaction-manager="transactionManager">
+            <batch:chunk reader="procesoCobroReader"
+                         processor="procesoCobroProcessor"
+                         writer="procesoCobroWriter" commit-interval="1">
+            </batch:chunk>
+            <batch:listeners>
+                <batch:listener ref="procesoCobroStepListener"/>
+                <batch:listener ref="promotionListener"/>
+            </batch:listeners>
+        </batch:tasklet>
+    </batch:step>
+
+    <bean id="procesoCobroReader"
+          class="org.springframework.batch.item.database.StoredProcedureItemReader"
+          scope="step">
+        <property name="dataSource" ref="carrierBillingDs"/>
+        <property name="procedureName" value="${carbill.sp.procedure.conscobropendiente.fullname}"/>
+        <property name="parameters">
+            <list>
+                <bean class="org.springframework.jdbc.core.SqlParameter" scope="step">
+                    <constructor-arg index="0" value="${carbill.sp.procedure.conscobropendiente.inparam1}"/>
+                    <constructor-arg index="1">
+                        <util:constant static-field="oracle.jdbc.OracleTypes.NUMERIC"/>
+                    </constructor-arg>
+                </bean>
+                <bean class="org.springframework.jdbc.core.SqlOutParameter" scope="step">
+                    <constructor-arg index="0" value="${carbill.sp.procedure.conscobropendiente.outparam2}"/>
+                    <constructor-arg index="1">
+                        <util:constant static-field="oracle.jdbc.OracleTypes.CURSOR"/>
+                    </constructor-arg>
+                </bean>
+                <bean class="org.springframework.jdbc.core.SqlOutParameter" scope="step">
+                    <constructor-arg index="0" value="${carbill.sp.procedure.conscobropendiente.outparam3}"/>
+                    <constructor-arg index="1">
+                        <util:constant static-field="oracle.jdbc.OracleTypes.VARCHAR"/>
+                    </constructor-arg>
+                </bean>
+                <bean class="org.springframework.jdbc.core.SqlOutParameter" scope="step">
+                    <constructor-arg index="0" value="${carbill.sp.procedure.conscobropendiente.outparam4}"/>
+                    <constructor-arg index="1">
+                        <util:constant static-field="oracle.jdbc.OracleTypes.VARCHAR"/>
+                    </constructor-arg>
+                </bean>
+            </list>
+        </property>
+        <property name="refCursorPosition" value="2"/>
+        <property name="rowMapper" ref="procesoCobroRowMapper"/>
+        <property name="preparedStatementSetter" ref="procesoCobroPreparedStatementSetter"/>
+    </bean>
+
+    <bean id="procesoCobroProcessor"
+          class="pe.com.entel.aplicacion.carrierbilling.jobs.processor.ProcesoCobroProcessor"
+          scope="step">
+        <property name="gestionCobroService" ref="gestionCobroService"/>
+    </bean>
+
+    <bean id="procesoCobroWriter"
+          class="pe.com.entel.aplicacion.carrierbilling.jobs.writer.ProcesoCobroWriter"
+          scope="step">
+        <property name="procedure" ref="actualizaCobroStoreProcedure"/>
+    </bean>
+
+    <bean id="gestionCobroService"
+          class="pe.com.entel.aplicacion.carrierbilling.service.GestionCobroService">
+        <property name="cobroWsTemplate" ref="cobroWsTemplate"/>
+        <property name="cobroConfirmacionWsTemplate" ref="cobroConfirmacionWsTemplate"/>
+        <property name="currency" value="${carbill.app.currency}"/>
+        <property name="idAplicacion" value="${carbill.app.idAplicacion}"/>
+        <property name="userId" value="${carbill.app.userId}"/>
+    </bean>
+
+    <bean id="procesoCobroPreparedStatementSetter"
+          class="pe.com.entel.aplicacion.carrierbilling.mapper.ProcesoCobroPreparedStatementSetter"
+          scope="step">
+        <property name="paginaActual" value="#{jobExecutionContext[pagina_actual]}"/>
+    </bean>
+
+    <bean id="procesoCobroStepListener"
+          class="pe.com.entel.aplicacion.carrierbilling.jobs.listener.ProcesoCobroStepListener"
+          scope="step"/>
+
+    <bean id="procesoCobroRowMapper"
+          class="pe.com.entel.aplicacion.carrierbilling.mapper.ProcesoCobroRowMapper"
+          scope="step"/>
+
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="carrierBillingDs"/>
+    </bean>
+
+    <bean id="actualizaCobroStoreProcedure"
+          class="pe.com.entel.aplicacion.carrierbilling.repository.ActualizaCobroStoreProcedure"
+          scope="singleton" lazy-init="true">
+        <constructor-arg index="0" ref="jdbcTemplate"/>
+        <constructor-arg index="1" value="${carbill.sp.procedure.actualizacobro.fullname}"/>
+        <constructor-arg index="2" value="${carbill.sp.procedure.actualizacobro.inparam1}"/>
+        <constructor-arg index="3" value="${carbill.sp.procedure.actualizacobro.inparam2}"/>
+        <constructor-arg index="4" value="${carbill.sp.procedure.actualizacobro.outparam3}"/>
+        <constructor-arg index="5" value="${carbill.sp.procedure.actualizacobro.outparam4}"/>
+    </bean>
+
+    <bean id="regCobroPendienteStoreProcedure"
+          class="pe.com.entel.aplicacion.carrierbilling.repository.RegCobroPendienteStoreProcedure"
+          scope="singleton" lazy-init="true">
+        <constructor-arg index="0" ref="jdbcTemplate"/>
+        <constructor-arg index="1" value="${carbill.sp.procedure.recobropendiente.fullname}"/>
+        <constructor-arg index="2" value="${carbill.sp.procedure.recobropendiente.inparam1}"/>
+        <constructor-arg index="3" value="${carbill.sp.procedure.recobropendiente.inparam2}"/>
+        <constructor-arg index="4" value="${carbill.sp.procedure.recobropendiente.outparam3}"/>
+        <constructor-arg index="5" value="${carbill.sp.procedure.recobropendiente.outparam4}"/>
+        <constructor-arg index="6" value="${carbill.sp.procedure.recobropendiente.outparam5}"/>
+        <constructor-arg index="7" value="${carbill.sp.procedure.recobropendiente.outparam6}"/>
+    </bean>
+
+    <!-- Step 3 -->
+
+    <batch:step id="findCobroStepParent">
+        <batch:tasklet ref="finCobroTasklet">
+            <batch:listeners>
+                <batch:listener ref="promotionListener"/>
+            </batch:listeners>
+        </batch:tasklet>
+    </batch:step>
+
+    <bean id="finCobroTasklet" class="pe.com.entel.aplicacion.carrierbilling.jobs.tasklet.FinCobroTasklet"
+          scope="step">
+        <property name="procedure" ref="actualizaEjecucionStoreProcedure" />
+        <property name="idBillControl" value="#{jobExecutionContext[id_bill_control]}" />
+        <property name="suscripcionOk" value="#{jobExecutionContext[suscripcion_ok]}" />
+        <property name="suscripcionError" value="#{jobExecutionContext[suscripcion_error]}" />
+        <property name="suscripcionReintento" value="#{jobExecutionContext[suscripcion_reintento]}" />
+    </bean>
+
+    <bean id="actualizaEjecucionStoreProcedure"
+          class="pe.com.entel.aplicacion.carrierbilling.repository.ActualizaEjecucionStoreProcedure"
+          scope="singleton" lazy-init="true">
+        <constructor-arg index="0" ref="jdbcTemplate"/>
+        <constructor-arg index="1" value="${carbill.sp.procedure.actualizaejec.fullname}"/>
+        <constructor-arg index="2" value="${carbill.sp.procedure.actualizaejec.inparam1}"/>
+        <constructor-arg index="3" value="${carbill.sp.procedure.actualizaejec.inparam2}"/>
+        <constructor-arg index="4" value="${carbill.sp.procedure.actualizaejec.inparam3}"/>
+        <constructor-arg index="5" value="${carbill.sp.procedure.actualizaejec.inparam4}"/>
+        <constructor-arg index="6" value="${carbill.sp.procedure.actualizaejec.inparam5}"/>
+        <constructor-arg index="7" value="${carbill.sp.procedure.actualizaejec.outparam6}"/>
+        <constructor-arg index="8" value="${carbill.sp.procedure.actualizaejec.outparam7}"/>
+    </bean>
+
+</beans>

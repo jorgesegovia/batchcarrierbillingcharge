@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context
+                           http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:component-scan base-package="pe.com.entel.aplicacion.carrierbilling"/>
+    <context:annotation-config/>
+
+    <!-- Resources -->
+
+    <bean id="corePlaceHolder"
+          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="ignoreUnresolvablePlaceholders" value="true"/>
+        <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE"/>
+        <property name="searchSystemEnvironment" value="true"/>
+        <property name="locations">
+            <list>
+                <value>file:${carbill.dir.cfg}/app.properties</value>
+                <value>file:${carbill.dir.cfg}/jdbc.properties</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="transactionManager"
+          class="org.springframework.batch.support.transaction.ResourcelessTransactionManager"/>
+
+    <bean id="carrierBillingDs" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="${carbill.jdbc.driverClassName}"/>
+        <property name="url" value="${carbill.jdbc.url}"/>
+        <property name="username" value="${carbill.jdbc.username}"/>
+        <property name="password" value="${carbill.jdbc.password}"/>
+        <property name="initialSize" value="${carbill.jdbc.initialSize}"/>
+        <property name="maxActive" value="${carbill.jdbc.maxActive}"/>
+        <property name="minIdle" value="${carbill.jdbc.minIdle}"/>
+    </bean>
+
+    <bean id="jobTaskExecutor"
+          class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+        <property name="corePoolSize" value="${carbill.job.thread.corePoolSize}"/>
+        <property name="maxPoolSize" value="${carbill.job.thread.maxPoolSize}"/>
+        <property name="threadNamePrefix" value="${carbill.job.thread.threadNamePrefix}"/>
+        <property name="WaitForTasksToCompleteOnShutdown" value="true"/>
+    </bean>
+
+    <!-- Jobs configurations -->
+
+    <bean id="jobRegistry"
+          class="org.springframework.batch.core.configuration.support.MapJobRegistry"/>
+
+    <bean id="jobRepository"
+          class="org.springframework.batch.core.repository.support.MapJobRepositoryFactoryBean">
+        <property name="transactionManager" ref="transactionManager"/>
+    </bean>
+
+    <bean id="jobExplorer"
+          class="org.springframework.batch.core.explore.support.MapJobExplorerFactoryBean">
+        <property name="repositoryFactory" ref="&amp;jobRepository"/>
+    </bean>
+
+    <bean id="jobLauncher"
+          class="org.springframework.batch.core.launch.support.SimpleJobLauncher">
+        <property name="jobRepository" ref="jobRepository"/>
+        <property name="taskExecutor" ref="jobTaskExecutor"/>
+    </bean>
+
+    <bean id="jobOperatorLauncher"
+          class="org.springframework.batch.core.launch.support.SimpleJobOperator">
+        <property name="jobRepository" ref="jobRepository"/>
+        <property name="jobLauncher" ref="jobLauncher"/>
+        <property name="jobExplorer" ref="jobExplorer"/>
+        <property name="jobRegistry" ref="jobRegistry"/>
+    </bean>
+
+    <!-- Jobs Registrar -->
+
+    <bean class="org.springframework.batch.core.configuration.support.AutomaticJobRegistrar">
+        <property name="applicationContextFactories">
+            <bean class="org.springframework.batch.core.configuration.support.ClasspathXmlApplicationContextsFactoryBean">
+                <property name="resources" value="classpath:jobs/*-job.xml"/>
+            </bean>
+        </property>
+        <property name="jobLoader">
+            <bean class="org.springframework.batch.core.configuration.support.DefaultJobLoader">
+                <property name="jobRegistry" ref="jobRegistry"/>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="messageFactory" class="org.springframework.ws.soap.saaj.SaajSoapMessageFactory"/>
+
+    <bean id="jaxb2Marshaller" class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
+        <property name="packagesToScan">
+            <list>
+                <value>pe.com.entel.esb.data.generico.entelgenericheader.v1</value>
+                <value>pe.com.entel.soa.data.generico.entelfault.v1</value>
+                <value>pe.com.entel.soa.data.generico.entelgenericheader.v1</value>
+                <value>pe.com.entel.soa.data.generico.responsestatus.v1</value>
+                <value>pe.com.entel.soa.data.cliente.telefono.v1</value>
+                <value>pe.com.entel.soa.data.servicio.carrierbilling.v1</value>
+                <value>com.oracle.xmlns.carrierbilling.bpel_gestioncobro</value>
+                <value>com.oracle.xmlns.carrierbilling.bpel_gestioncobroconfirmacion</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="cobroWsTemplate" class="org.springframework.ws.client.core.WebServiceTemplate">
+        <constructor-arg ref="messageFactory"/>
+        <property name="marshaller" ref="jaxb2Marshaller"></property>
+        <property name="unmarshaller" ref="jaxb2Marshaller"></property>
+        <property name="messageSender">
+            <bean class="org.springframework.ws.transport.http.HttpComponentsMessageSender">
+                <property name="connectionTimeout" value="${carbill.ws.cobro.connectionTimeout}"/>
+                <property name="readTimeout" value="${carbill.ws.cobro.readTimeout}"/>
+            </bean>
+        </property>
+        <property name="defaultUri" value="${carbill.ws.cobro.url}"/>
+    </bean>
+
+    <bean id="cobroConfirmacionWsTemplate" class="org.springframework.ws.client.core.WebServiceTemplate">
+        <constructor-arg ref="messageFactory"/>
+        <property name="marshaller" ref="jaxb2Marshaller"></property>
+        <property name="unmarshaller" ref="jaxb2Marshaller"></property>
+        <property name="messageSender">
+            <bean class="org.springframework.ws.transport.http.HttpComponentsMessageSender">
+                <property name="connectionTimeout" value="${carbill.ws.cobroconfirmacion.connectionTimeout}"/>
+                <property name="readTimeout" value="${carbill.ws.cobroconfirmacion.readTimeout}"/>
+            </bean>
+        </property>
+        <property name="defaultUri" value="${carbill.ws.cobroconfirmacion.url}"/>
+    </bean>
+
+</beans>
