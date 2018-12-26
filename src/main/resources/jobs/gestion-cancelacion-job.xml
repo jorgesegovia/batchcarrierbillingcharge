@@ -57,7 +57,7 @@
     </bean>
 
     <bean id="procesoCancelacionWriter"
-          class="pe.com.entel.aplicacion.carrierbilling.jobs.writer.ProcesoCobroWriter"
+          class="pe.com.entel.aplicacion.carrierbilling.jobs.writer.ProcesoCancelacionWriter"
           scope="step">
         <property name="procedure" ref="actualizaCancelacionStoreProcedure"/>
     </bean>
