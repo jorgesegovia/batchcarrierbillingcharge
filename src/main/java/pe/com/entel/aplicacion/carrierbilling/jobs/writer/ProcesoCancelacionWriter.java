@@ -63,7 +63,17 @@ public class ProcesoCancelacionWriter implements ItemWriter<Suscripcion> {
         
         logger.debug("Token");
 		String urlToken = "https://apiinternaluat.entel.pe/auth/oauth/v2/token?grant_type=" + grant_type + "&client_id=" + client_id + "&client_secret=" + client_secret;
-		String tokenJson = this.invocarRest(urlToken, metodo, null);
+		
+		ArrayList<HeaderRequest> listaHeaders2 = new ArrayList<HeaderRequest>();
+		
+		HeaderRequest header6 = new HeaderRequest();
+		header6.setNombre("Content-Type");
+		header6.setValor("application/x-www-form-urlencoded");
+		listaHeaders2.add(header6);
+		
+		
+		String tokenJson = this.invocarRest(urlToken, metodo, listaHeaders2);
+		logger.debug("tokenJson : " + tokenJson);
 		Gson gson = new Gson();
         Token token = gson.fromJson(tokenJson, Token.class);
         logger.debug("getAcces_token : " + token.getAcces_token());
@@ -108,15 +118,16 @@ public class ProcesoCancelacionWriter implements ItemWriter<Suscripcion> {
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod(metodo);
 			conn.setRequestProperty("Accept", "application/json");
-			
+			logger.debug("cadenaUrl : " + cadenaUrl);
 			if( listaCabecera!=null && !listaCabecera.isEmpty()) {
+				logger.debug("listaCabecera : " + listaCabecera);
 				for(HeaderRequest header : listaCabecera) {
 					logger.debug("header.getNombre() : " + header.getNombre());
 					logger.debug("header.getValor() : " + header.getValor());					
 					conn.setRequestProperty(header.getNombre(), header.getValor());					
 				}
 			}
-			
+			logger.debug("conn.getResponseCode() : " + conn.getResponseCode());
 			if (conn.getResponseCode() != 200) {
 				throw new RuntimeException("Failed : HTTP error code : " + conn.getResponseCode());
 			}
@@ -130,9 +141,11 @@ public class ProcesoCancelacionWriter implements ItemWriter<Suscripcion> {
 
 			conn.disconnect();
 		} catch (MalformedURLException e) {
-			e.printStackTrace();
+			logger.debug("error" , e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.debug("error" , e);
+		} catch(Exception e) {
+			logger.debug("error" , e);
 		}
 		return output;
 	}
