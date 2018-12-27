@@ -14,6 +14,7 @@ public class ProcesoCancelacionPreparedStatementSetter implements PreparedStatem
 
     @Override
     public void setValues(PreparedStatement ps) throws SQLException {
+    	logger.debug("preparedStatement : " + ps);
         CallableStatement cs = (CallableStatement) ps;
         cs.registerOutParameter(1, OracleTypes.CURSOR);
         cs.registerOutParameter(2, OracleTypes.VARCHAR);
