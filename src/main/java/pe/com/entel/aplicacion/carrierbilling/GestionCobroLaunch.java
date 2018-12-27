@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Component;
 
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -40,42 +41,53 @@ public class GestionCobroLaunch {
                 ctx.close();
             }
         }
-
     }
+
+    public void validatingJob(String jobName) throws Exception {
+        int timeToWaitJob = 10;
+        while (true) {
+            Set<Long> idsJob = jobOperator.getRunningExecutions(jobName);
+
+            if (idsJob == null || idsJob.size() > 0) {
+                logger.info("Job [ " + jobName + " ] se encuentra en ejecucion. Esperando " + timeToWaitJob + " secs ...");
+                TimeUnit.SECONDS.sleep(timeToWaitJob);
+            } else {
+                logger.info("Job [ " + jobName + " ] termino de ejecutarse!");
+                break;
+            }
+        }
+    }
+
 
     public void start(String args[]) {
         try {
-            String jobName = "gestionCobroJob";
+            String firstJobName = "gestionCobroJob";
 
             String dateProcess = args[0];
 
-            JobParameters jobParameters = new JobParametersBuilder()
+            JobParameters firstJobParameters = new JobParametersBuilder()
                     .addString("dateProcesoStr", dateProcess)
                     .toJobParameters();
 
-            String params = jobParameters.toString();
-            params = StringUtils.substring(params, 1, params.length() - 1);
+            String firstParams = firstJobParameters.toString();
+            firstParams = StringUtils.substring(firstParams, 1, firstParams.length() - 1);
 
-            jobOperator.start(jobName, params);
+            jobOperator.start(firstJobName, firstParams);
 
-            TimeUnit.SECONDS.sleep(10);
+            validatingJob(firstJobName);
 
-            logger.debug("Esperando 70 sec...");
-
-            String jobName1 = "gestionCancelacionJob";
-
-            JobParameters jobParameters1 = new JobParametersBuilder()
-                    .addString("dateProcesoStr", dateProcess)
-                    .toJobParameters();
-
-            String params1 = jobParameters1.toString();
-            params1 = StringUtils.substring(params1, 1, params1.length() - 1);
-
-            jobOperator.start(jobName1, params1);
-
-            TimeUnit.SECONDS.sleep(10);
-
-            logger.debug("Esperando 20 sec...");
+//            String secondJobName = "gestionCancelacionJob";
+//
+//            JobParameters secondJobParameters = new JobParametersBuilder()
+//                    .addString("dateProcesoStr", dateProcess)
+//                    .toJobParameters();
+//
+//            String secondParams = secondJobParameters.toString();
+//            secondParams = StringUtils.substring(secondParams, 1, secondParams.length() - 1);
+//
+//            jobOperator.start(secondJobName, secondParams);
+//
+//            validatingJob(secondJobName);
 
         } catch (Exception e) {
             logger.error(e);

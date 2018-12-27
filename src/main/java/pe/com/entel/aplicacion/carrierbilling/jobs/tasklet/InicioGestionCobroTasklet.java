@@ -54,9 +54,9 @@ public class InicioGestionCobroTasklet implements Tasklet {
         }
 
         chunkContext.getStepContext().getStepExecution().getJobExecution().getExecutionContext().putInt("id_bill_control", o.getIdBillControl());
-        chunkContext.getStepContext().getStepExecution().getJobExecution().getExecutionContext().putInt("suscripcion_ok", 3);
-        chunkContext.getStepContext().getStepExecution().getJobExecution().getExecutionContext().putInt("suscripcion_error", 3);
-        chunkContext.getStepContext().getStepExecution().getJobExecution().getExecutionContext().putInt("suscripcion_reintento", 3);
+        chunkContext.getStepContext().getStepExecution().getJobExecution().getExecutionContext().putInt("suscripcion_ok", 0);
+        chunkContext.getStepContext().getStepExecution().getJobExecution().getExecutionContext().putInt("suscripcion_error", 0);
+        chunkContext.getStepContext().getStepExecution().getJobExecution().getExecutionContext().putInt("suscripcion_reintento", 0);
 
         return RepeatStatus.FINISHED;
     }

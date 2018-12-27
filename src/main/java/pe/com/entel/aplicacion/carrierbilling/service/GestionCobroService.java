@@ -48,7 +48,11 @@ public class GestionCobroService {
 
         ejecutarCobroWs(s);
 
-        ejecutarCobroConfirmacionWs(s);
+        if ("0000".equals(s.getCodigorpta())) {
+            ejecutarCobroConfirmacionWs(s);
+        }
+
+        logger.debug("Suscripcion: " + s);
 
         return s;
     }
@@ -90,7 +94,7 @@ public class GestionCobroService {
 
 
         if (ejecutarCobroResp == null) {
-            throw new Exception("Respuesta es null");
+            throw new Exception("Respuesta del servicio Gestioncobro es null");
         }
 
         String codigoRespuestWs = ejecutarCobroResp.getResponseStatus().getCodigoRespuesta();
@@ -98,10 +102,14 @@ public class GestionCobroService {
         logger.info("Codigo Rspta: " + codigoRespuestWs);
         logger.info("Descripcion Rspta: " + descripcionRespuestaWs);
 
+        s.setCodigorpta(codigoRespuestWs);
+        s.setDescripcionrpta(descripcionRespuestaWs);
+
         if ("0000".equals(codigoRespuestWs)) {
-            logger.info("Servicio de cobro ejecutado correctamente.");
-        } else {
-            logger.error("Ocurrio un error al ejecutar el servicio de cobro.");
+            if (ejecutarCobroResp.getResponseData() != null) {
+                String paymentTransactionId = ejecutarCobroResp.getResponseData().getIdtransacccion();
+                s.setPaymentTransactionId(paymentTransactionId);
+            }
         }
 
         return s;
@@ -123,7 +131,7 @@ public class GestionCobroService {
         cbCobroType.setUserId(s.getIdCliente());
         cbCobroType.setAmount(String.valueOf(s.getMontoCobro()));
         cbCobroType.setCurrency(currency);
-        cbCobroType.setPaymentProviderTransactionId("");
+        cbCobroType.setPaymentProviderTransactionId(s.getPaymentTransactionId());
 
         request.setDatosCobro(cbCobroType);
 
@@ -135,25 +143,21 @@ public class GestionCobroService {
 
         logger.info("URI: " + cobroWsTemplate.getDefaultUri());
 
-        EjecutarCobroConfirmacionResponseType response = (EjecutarCobroConfirmacionResponseType) cobroWsTemplate.marshalSendAndReceive(request,
+        EjecutarCobroConfirmacionResponseType response = (EjecutarCobroConfirmacionResponseType) cobroConfirmacionWsTemplate.marshalSendAndReceive(request,
                 new BpelHeaderMessageCallBack(s.getCanal(), idAplicacion, userId,
                         todayTrxFormat, todayTrxFormat, todayfechaInicioFormat));
 
 
         if (response == null) {
-            throw new Exception("Respuesta es null");
+            throw new Exception("Respuesta del servicio Gestioncobroconfirmacion es null");
         }
 
         String codigoRespuestWs = response.getResponseStatus().getCodigoRespuesta();
         String descripcionRespuestaWs = response.getResponseStatus().getDescripcionRespuesta();
         logger.info("Codigo Rspta: " + codigoRespuestWs);
         logger.info("Descripcion Rspta: " + descripcionRespuestaWs);
-
-        if ("0000".equals(codigoRespuestWs)) {
-            logger.info("Servicio de cobro ejecutado correctamente.");
-        } else {
-            logger.error("Ocurrio un error al ejecutar el servicio de cobro.");
-        }
+        s.setCodigorpta(codigoRespuestWs);
+        s.setDescripcionrpta(descripcionRespuestaWs);
 
         return s;
     }

@@ -22,6 +22,9 @@ public class Suscripcion {
     private String merchantTransactionId;
     private String canal;
     private String shareAccountId;
+    private String codigorpta;
+    private String descripcionrpta;
+    private String paymentTransactionId;
 
     public String getShareAccountId() {
         return shareAccountId;
@@ -149,6 +152,30 @@ public class Suscripcion {
 
     public void setCanal(String canal) {
         this.canal = canal;
+    }
+
+    public String getCodigorpta() {
+        return codigorpta;
+    }
+
+    public void setCodigorpta(String codigorpta) {
+        this.codigorpta = codigorpta;
+    }
+
+    public String getDescripcionrpta() {
+        return descripcionrpta;
+    }
+
+    public void setDescripcionrpta(String descripcionrpta) {
+        this.descripcionrpta = descripcionrpta;
+    }
+
+    public String getPaymentTransactionId() {
+        return paymentTransactionId;
+    }
+
+    public void setPaymentTransactionId(String paymentTransactionId) {
+        this.paymentTransactionId = paymentTransactionId;
     }
 
     @Override

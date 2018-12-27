@@ -73,6 +73,9 @@
             <batch:chunk reader="procesoCobroReader"
                          processor="procesoCobroProcessor"
                          writer="procesoCobroWriter" commit-interval="1">
+            <batch:streams>
+                <batch:stream ref="procesoCobroWriter" />
+            </batch:streams>
             </batch:chunk>
             <batch:listeners>
                 <batch:listener ref="procesoCobroStepListener"/>
