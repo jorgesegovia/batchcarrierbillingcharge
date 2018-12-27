@@ -44,15 +44,15 @@ public class GestionCobroLaunch {
     }
 
     public void validatingJob(String jobName) throws Exception {
-        int timeToWaitJob = 10;
+        int timeToWaitJob = 1;
         while (true) {
             Set<Long> idsJob = jobOperator.getRunningExecutions(jobName);
 
             if (idsJob == null || idsJob.size() > 0) {
-                logger.info("Job [ " + jobName + " ] se encuentra en ejecucion. Esperando " + timeToWaitJob + " secs ...");
+                //logger.info("Job [ " + jobName + " ] se encuentra en ejecucion. Esperando " + timeToWaitJob + " secs ...");
                 TimeUnit.SECONDS.sleep(timeToWaitJob);
             } else {
-                logger.info("Job [ " + jobName + " ] termino de ejecutarse!");
+                //logger.info("Job [ " + jobName + " ] termino de ejecutarse!");
                 break;
             }
         }
@@ -65,7 +65,7 @@ public class GestionCobroLaunch {
 
             String dateProcess = args[0];
 
-            JobParameters firstJobParameters = new JobParametersBuilder()
+            /*JobParameters firstJobParameters = new JobParametersBuilder()
                     .addString("dateProcesoStr", dateProcess)
                     .toJobParameters();
 
@@ -75,19 +75,19 @@ public class GestionCobroLaunch {
             jobOperator.start(firstJobName, firstParams);
 
             validatingJob(firstJobName);
+*/
+            String secondJobName = "gestionCancelacionJob";
 
-//            String secondJobName = "gestionCancelacionJob";
-//
-//            JobParameters secondJobParameters = new JobParametersBuilder()
-//                    .addString("dateProcesoStr", dateProcess)
-//                    .toJobParameters();
-//
-//            String secondParams = secondJobParameters.toString();
-//            secondParams = StringUtils.substring(secondParams, 1, secondParams.length() - 1);
-//
-//            jobOperator.start(secondJobName, secondParams);
-//
-//            validatingJob(secondJobName);
+            JobParameters secondJobParameters = new JobParametersBuilder()
+                    .addString("dateProcesoStr", dateProcess)
+                    .toJobParameters();
+
+            String secondParams = secondJobParameters.toString();
+            secondParams = StringUtils.substring(secondParams, 1, secondParams.length() - 1);
+
+            jobOperator.start(secondJobName, secondParams);
+
+            validatingJob(secondJobName);
 
         } catch (Exception e) {
             logger.error(e);

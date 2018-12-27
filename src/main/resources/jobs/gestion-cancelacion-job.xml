@@ -60,6 +60,7 @@
           class="pe.com.entel.aplicacion.carrierbilling.jobs.writer.ProcesoCancelacionWriter"
           scope="step">
         <property name="procedure" ref="actualizaCancelacionStoreProcedure"/>
+        <property name="service" ref="gestionCancelacionService"/>
     </bean>
 
     <bean id="procesoCancelacionPreparedStatementSetter"
@@ -82,5 +83,14 @@
         <constructor-arg index="3" value="${carbill.sp.procedure.actualizacancelacion.outparam2}" />
         <constructor-arg index="4" value="${carbill.sp.procedure.actualizacancelacion.outparam3}" />
     </bean>
+
+    <bean id="gestionCancelacionService"
+          class="pe.com.entel.aplicacion.carrierbilling.service.GestionCancelacionService"
+          scope="singleton" lazy-init="true">
+        <constructor-arg index="0" value="${carbill.rest.token.url}"/>
+        <constructor-arg index="1" value="${carbill.rest.token.metodo}"/>
+        <constructor-arg index="2" value="${carbill.rest.terminar.url}" />
+        <constructor-arg index="3" value="${carbill.rest.terminar.metodo}" />
+    </bean>    
 
 </beans>
