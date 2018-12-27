@@ -13,15 +13,12 @@ public class ProcesoCobroStepListener implements StepExecutionListener {
     public void beforeStep(StepExecution stepExecution) {
         logger.info("Total de paginas: " + stepExecution.getJobExecution().getExecutionContext().getInt("total_paginas"));
         logger.info("Pagina actual: " + stepExecution.getJobExecution().getExecutionContext().getInt("pagina_actual"));
+        stepExecution.getExecutionContext().putInt("suscripcion_ok", 0);
+        stepExecution.getExecutionContext().putInt("suscripcion_error", 0);
     }
 
     @Override
     public ExitStatus afterStep(StepExecution stepExecution) {
-
-        stepExecution.getJobExecution().getExecutionContext().putInt("suscripcion_ok", 4);
-        stepExecution.getJobExecution().getExecutionContext().putInt("suscripcion_error", 4);
-        stepExecution.getJobExecution().getExecutionContext().putInt("suscripcion_reintento", 4);
-
 
         int totalPaginas = stepExecution.getJobExecution().getExecutionContext().getInt("total_paginas");
         int paginaActual = stepExecution.getJobExecution().getExecutionContext().getInt("pagina_actual");
@@ -45,6 +42,9 @@ public class ProcesoCobroStepListener implements StepExecutionListener {
         } catch (NumberFormatException e) {
             logger.error(e);
         }
+
+        logger.info("Total de suscripciones Ok = " + stepExecution.getExecutionContext().getInt("suscripcion_ok"));
+        logger.info("Total de suscripciones Error = " + stepExecution.getExecutionContext().getInt("suscripcion_error"));
 
         return stepExecution.getExitStatus();
     }
