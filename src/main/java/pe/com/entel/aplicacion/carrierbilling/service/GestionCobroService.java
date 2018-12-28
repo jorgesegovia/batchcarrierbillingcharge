@@ -67,8 +67,8 @@ public class GestionCobroService {
                 = new pe.com.entel.soa.data.servicio.carrierbilling.v1.ObjectFactory();
 
         CarrierBillingCobroType cbCobroType = factory2.createCarrierBillingCobroType();
-        cbCobroType.setRequestId("12345678");
-        cbCobroType.setBangoTransactionId("12345678");
+        cbCobroType.setRequestId(s.getRequestId());
+        cbCobroType.setBangoTransactionId(s.getBangoTransactionId());
         cbCobroType.setMerchantTransactionId(s.getMerchantTransactionId());
         cbCobroType.setUserId(s.getIdCliente());
         cbCobroType.setAmount(String.valueOf(s.getMontoCobro()));
@@ -125,12 +125,12 @@ public class GestionCobroService {
                 = new pe.com.entel.soa.data.servicio.carrierbilling.v1.ObjectFactory();
 
         CarrierBillingCobroConfirmacionType cbCobroType = factory2.createCarrierBillingCobroConfirmacionType();
-        cbCobroType.setRequestId("12345678");
-        cbCobroType.setBangoTransactionId("12345678");
+        cbCobroType.setRequestId(s.getRequestId());
+        cbCobroType.setBangoTransactionId(s.getBangoTransactionId());
         cbCobroType.setMerchantTransactionId(s.getMerchantTransactionId());
         cbCobroType.setUserId(s.getIdCliente());
         cbCobroType.setAmount(String.valueOf(s.getMontoCobro()));
-        cbCobroType.setCurrency(currency);
+        cbCobroType.setCurrency(s.getCurrency());
         cbCobroType.setPaymentProviderTransactionId(s.getPaymentTransactionId());
 
         request.setDatosCobro(cbCobroType);

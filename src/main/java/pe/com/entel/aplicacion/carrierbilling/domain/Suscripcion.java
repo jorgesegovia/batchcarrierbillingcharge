@@ -25,6 +25,9 @@ public class Suscripcion {
     private String codigorpta;
     private String descripcionrpta;
     private String paymentTransactionId;
+    private String requestId;
+    private String bangoTransactionId;
+    private int idCanal;
 
     public String getShareAccountId() {
         return shareAccountId;
@@ -178,6 +181,30 @@ public class Suscripcion {
         this.paymentTransactionId = paymentTransactionId;
     }
 
+    public String getRequestId() {
+        return requestId;
+    }
+
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
+    }
+
+    public String getBangoTransactionId() {
+        return bangoTransactionId;
+    }
+
+    public void setBangoTransactionId(String bangoTransactionId) {
+        this.bangoTransactionId = bangoTransactionId;
+    }
+
+    public int getIdCanal() {
+        return idCanal;
+    }
+
+    public void setIdCanal(int idCanal) {
+        this.idCanal = idCanal;
+    }
+
     @Override
     public String toString() {
         return "Suscripcion{" +
@@ -195,6 +222,14 @@ public class Suscripcion {
                 ", productDescription='" + productDescription + '\'' +
                 ", productCategory='" + productCategory + '\'' +
                 ", merchantTransactionId='" + merchantTransactionId + '\'' +
+                ", canal='" + canal + '\'' +
+                ", shareAccountId='" + shareAccountId + '\'' +
+                ", codigorpta='" + codigorpta + '\'' +
+                ", descripcionrpta='" + descripcionrpta + '\'' +
+                ", paymentTransactionId='" + paymentTransactionId + '\'' +
+                ", requestId='" + requestId + '\'' +
+                ", bangoTransactionId='" + bangoTransactionId + '\'' +
+                ", idCanal=" + idCanal +
                 '}';
     }
 }
