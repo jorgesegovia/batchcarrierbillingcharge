@@ -60,6 +60,7 @@
           class="pe.com.entel.aplicacion.carrierbilling.jobs.writer.ProcesoCancelacionWriter"
           scope="step">
         <property name="procedure" ref="actualizaCancelacionStoreProcedure"/>
+        <property name="procedureError" ref="insertErrorCancelacionStoreProcedure"/>
         <property name="service" ref="gestionCancelacionService"/>
     </bean>
 
@@ -84,6 +85,19 @@
         <constructor-arg index="4" value="${carbill.sp.procedure.actualizacancelacion.outparam3}" />
     </bean>
 
+    <bean id="insertErrorCancelacionStoreProcedure"
+          class="pe.com.entel.aplicacion.carrierbilling.repository.InsertErrorCancelacionStoreProcedure"
+          scope="singleton" lazy-init="true">
+        <constructor-arg index="0" ref="jdbcTemplate"/>
+        <constructor-arg index="1" value="${carbill.sp.procedure.insertErrorCancelacion.fullname}"/>
+        <constructor-arg index="2" value="${carbill.sp.procedure.insertErrorCancelacion.inparam1}" />
+        <constructor-arg index="3" value="${carbill.sp.procedure.insertErrorCancelacion.inparam2}" />
+        <constructor-arg index="4" value="${carbill.sp.procedure.insertErrorCancelacion.inparam3}" />
+        <constructor-arg index="5" value="${carbill.sp.procedure.insertErrorCancelacion.inparam4}" />
+        <constructor-arg index="6" value="${carbill.sp.procedure.insertErrorCancelacion.outparam5}" />
+        <constructor-arg index="7" value="${carbill.sp.procedure.insertErrorCancelacion.outparam6}" />
+    </bean>
+    
     <bean id="gestionCancelacionService"
           class="pe.com.entel.aplicacion.carrierbilling.service.GestionCancelacionService"
           scope="singleton" lazy-init="true">

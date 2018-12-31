@@ -61,10 +61,9 @@ public class GestionCobroLaunch {
 
     public void start(String args[]) {
         try {
-            String firstJobName = "gestionCobroJob";
 
             String dateProcess = args[0];
-
+/*
             JobParameters firstJobParameters = new JobParametersBuilder()
                     .addString("dateProcesoStr", dateProcess)
                     .toJobParameters();
@@ -75,19 +74,19 @@ public class GestionCobroLaunch {
             jobOperator.start(firstJobName, firstParams);
 
             validatingJob(firstJobName);
+*/
+            String secondJobName = "gestionCancelacionJob";
 
-//            String secondJobName = "gestionCancelacionJob";
-//
-//            JobParameters secondJobParameters = new JobParametersBuilder()
-//                    .addString("dateProcesoStr", dateProcess)
-//                    .toJobParameters();
-//
-//            String secondParams = secondJobParameters.toString();
-//            secondParams = StringUtils.substring(secondParams, 1, secondParams.length() - 1);
-//
-//            jobOperator.start(secondJobName, secondParams);
-//
-//            validatingJob(secondJobName);
+            JobParameters secondJobParameters = new JobParametersBuilder()
+                    .addString("dateProcesoStr", dateProcess)
+                    .toJobParameters();
+
+            String secondParams = secondJobParameters.toString();
+            secondParams = StringUtils.substring(secondParams, 1, secondParams.length() - 1);
+
+            jobOperator.start(secondJobName, secondParams);
+
+            validatingJob(secondJobName);
 
         } catch (Exception e) {
             logger.error(e);

@@ -7,7 +7,9 @@ import org.springframework.batch.item.ItemWriter;
 
 import pe.com.entel.aplicacion.carrierbilling.domain.ActualizarCancelacionSp;
 import pe.com.entel.aplicacion.carrierbilling.domain.Suscripcion;
+import pe.com.entel.aplicacion.carrierbilling.exception.ApiManagementException;
 import pe.com.entel.aplicacion.carrierbilling.repository.ActualizaCancelacionStoreProcedure;
+import pe.com.entel.aplicacion.carrierbilling.repository.InsertErrorCancelacionStoreProcedure;
 import pe.com.entel.aplicacion.carrierbilling.service.GestionCancelacionService;
 
 public class ProcesoCancelacionWriter implements ItemWriter<Suscripcion> {
@@ -15,6 +17,7 @@ public class ProcesoCancelacionWriter implements ItemWriter<Suscripcion> {
 	static Logger logger = Logger.getLogger(ProcesoCancelacionWriter.class);
 
 	private ActualizaCancelacionStoreProcedure procedure;
+	private InsertErrorCancelacionStoreProcedure procedureError;
 	private GestionCancelacionService service;
 	
 	@Override
@@ -23,17 +26,21 @@ public class ProcesoCancelacionWriter implements ItemWriter<Suscripcion> {
 		for (Suscripcion s : list) {
 			
 			logger.debug("API terminar" + s);
-			service.ejecutar(s.getShareAccountId());
-			
-			logger.debug("ActualizaCobroStoreProcedure: " + procedure);
-			ActualizarCancelacionSp o = new ActualizarCancelacionSp();
-			o.setIdsuscripcion(s.getIdSuscripcion());
-			ActualizarCancelacionSp resp = procedure.run(o);
+			try {
+				service.ejecutar(s.getShareAccountId());
+				logger.debug("ActualizaCobroStoreProcedure: " + procedure);
+				ActualizarCancelacionSp o = new ActualizarCancelacionSp();
+				o.setIdsuscripcion(s.getIdSuscripcion());
+				ActualizarCancelacionSp resp = procedure.run(o);
 
-			if (!"0000".equals(resp.getCodigorpta())) {
-				logger.debug("Suscripcion: " + s);
-				throw new Exception("Error en el procedure");
+				if (!"0000".equals(resp.getCodigorpta())) {
+					logger.debug("Suscripcion: " + s);
+					throw new Exception("Error en el procedure");
+				}
+			}catch (ApiManagementException e){
+				procedureError.run(e.getError());
 			}
+
 		}
 	}
 
@@ -53,4 +60,12 @@ public class ProcesoCancelacionWriter implements ItemWriter<Suscripcion> {
 		this.service = service;
 	}
 
+	public InsertErrorCancelacionStoreProcedure getProcedureError() {
+		return procedureError;
+	}
+
+	public void setProcedureError(InsertErrorCancelacionStoreProcedure procedureError) {
+		this.procedureError = procedureError;
+	}
+	
 }

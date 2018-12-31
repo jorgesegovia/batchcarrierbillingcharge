@@ -1,10 +1,8 @@
 package pe.com.entel.aplicacion.carrierbilling.service;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
@@ -15,8 +13,10 @@ import org.apache.log4j.Logger;
 
 import com.google.gson.Gson;
 
+import pe.com.entel.aplicacion.carrierbilling.domain.ApiManagementError;
 import pe.com.entel.aplicacion.carrierbilling.domain.HeaderRequest;
 import pe.com.entel.aplicacion.carrierbilling.domain.Token;
+import pe.com.entel.aplicacion.carrierbilling.exception.ApiManagementException;
 
 public class GestionCancelacionService {
 
@@ -41,7 +41,7 @@ public class GestionCancelacionService {
 		
 	}
 
-	public String ejecutar(String shareAccountId) {
+	public String ejecutar(String shareAccountId) throws ApiManagementException{
 
 		logger.debug("Token");
 		ArrayList<HeaderRequest> listaHeadersToken = obtenerHeadersToken();
@@ -58,9 +58,11 @@ public class GestionCancelacionService {
 		return terminarJson;
 	}
 
-	private String invocarRest(String cadenaUrl, String metodo, ArrayList<HeaderRequest> listaCabecera) {
+	private String invocarRest(String cadenaUrl, String metodo, ArrayList<HeaderRequest> listaCabecera) throws ApiManagementException {
 		String output = "";
 		StringBuilder sb = new StringBuilder();
+		ApiManagementError apiManagementError = new ApiManagementError();
+		apiManagementError.setServicio(cadenaUrl);
 		try {
 			URL url = new URL(cadenaUrl);
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -73,8 +75,11 @@ public class GestionCancelacionService {
 				}
 			}
 			logger.debug("conn.getResponseCode() : " + conn.getResponseCode());
+			
+			apiManagementError.setCodigoHttp(conn.getResponseCode());
+			
 			if (conn.getResponseCode() != 200) {
-				throw new RuntimeException("Failed : HTTP error code : " + conn.getResponseCode());
+				throw new ApiManagementException(apiManagementError);
 			}
 
 			BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
@@ -85,12 +90,10 @@ public class GestionCancelacionService {
 			}
 			logger.debug(sb.toString());
 			conn.disconnect();
-		} catch (MalformedURLException e) {
-			logger.debug("error", e);
-		} catch (IOException e) {
-			logger.debug("error", e);
 		} catch (Exception e) {
 			logger.debug("error", e);
+			apiManagementError.setDescripcionError(e.getMessage());
+			throw new ApiManagementException(apiManagementError);
 		}
 		return sb.toString();
 	}
