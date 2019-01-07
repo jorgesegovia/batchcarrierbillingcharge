@@ -10,6 +10,7 @@ import pe.com.entel.aplicacion.carrierbilling.domain.EjecucionCobro;
 import pe.com.entel.aplicacion.carrierbilling.domain.Suscripcion;
 import pe.com.entel.aplicacion.carrierbilling.repository.ActualizaCobroStoreProcedure;
 
+import javax.batch.runtime.StepExecution;
 import java.util.List;
 
 /**
@@ -23,7 +24,10 @@ public class ProcesoCobroWriter implements ItemWriter<EjecucionCobro>, ItemStrea
     private ActualizaCobroStoreProcedure procedure;
 
     private int suscripcionOk = 0;
+
     private int suscripcionError = 0;
+
+    private StepExecution stepExecution;
 
     @Override
     public void write(List<? extends EjecucionCobro> list) throws Exception {
@@ -40,19 +44,21 @@ public class ProcesoCobroWriter implements ItemWriter<EjecucionCobro>, ItemStrea
                 o.setEstado("activa");
                 o.setEstadocobro("Cobrado");
                 suscripcionOk++;
+                logger.debug("IdSuscripcion: " + suscripcion.getIdSuscripcion() + " ejecutada OK ");
             } else {
                 o.setEstado("pendiente");
                 o.setEstadocobro("Pendiente");
                 suscripcionError++;
+                logger.debug("IdSuscripcion: " + suscripcion.getIdSuscripcion() + " ejecutada con ERROR ");
             }
 
             o.setIdsuscripcion(suscripcion.getIdSuscripcion());
             o.setIdbillcontrol(suscripcion.getBillControl());
-            o.setWscodrpta(o.getCodigorpta());
-            o.setWsdescripcionrpta(o.getMensaje());
-            o.setWsejecucion(o.getWsejecucion());
-            o.setWshttpstatus(o.getWshttpstatus());
-            o.setServicioejec(o.getServicioejec());
+            o.setWscodrpta(e.getWscodrpta());
+            o.setWsdescripcionrpta(e.getWsdescripcionrpta());
+            o.setWsejecucion(e.getWsejecucion());
+            o.setWshttpstatus(e.getWshttpstatus());
+            o.setServicioejec(e.getServicioejec());
 
             ActualizaCobroSp resp = procedure.run(o);
 
@@ -81,14 +87,11 @@ public class ProcesoCobroWriter implements ItemWriter<EjecucionCobro>, ItemStrea
         int ok = executionContext.getInt("suscripcion_ok");
         int error = executionContext.getInt("suscripcion_error");
 
-        logger.debug("Actual Ok = " + ok);
-        logger.debug("Actual Error = " + error);
-
         int sumOk = ok + suscripcionOk;
-        int sumError = ok + suscripcionError;
+        int sumError = error + suscripcionError;
 
-        logger.debug("Sumando Actual Ok = " + sumOk);
-        logger.debug("Sumando Actual Error = " + sumError);
+        logger.debug("Cuenta cobros OK = " + sumOk);
+        logger.debug("Cuenta cobros ERROR = " + sumError);
 
         executionContext.putInt("suscripcion_ok", sumOk);
         executionContext.putInt("suscripcion_error", sumError);
@@ -97,5 +100,13 @@ public class ProcesoCobroWriter implements ItemWriter<EjecucionCobro>, ItemStrea
     @Override
     public void close() throws ItemStreamException {
 
+    }
+
+    public StepExecution getStepExecution() {
+        return stepExecution;
+    }
+
+    public void setStepExecution(StepExecution stepExecution) {
+        this.stepExecution = stepExecution;
     }
 }

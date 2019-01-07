@@ -3,6 +3,7 @@ package pe.com.entel.aplicacion.carrierbilling.jobs.tasklet;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.StepContribution;
+import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
@@ -12,6 +13,7 @@ import pe.com.entel.aplicacion.carrierbilling.repository.ActualizaEjecucionStore
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author jsegovia
@@ -31,6 +33,10 @@ public class FinCobroTasklet implements Tasklet {
 
     private int suscripcionReintento;
 
+    private long tiempoInicial;
+
+    private String modificadoPor;
+
     @Override
     public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
         ActualizaEjecucionSp in = new ActualizaEjecucionSp();
@@ -39,6 +45,17 @@ public class FinCobroTasklet implements Tasklet {
         in.setSuscripcionOk(suscripcionOk);
         in.setSuscripcionError(suscripcionError);
         in.setSuscripcionReintento(suscripcionReintento);
+        in.setModificadoPor(modificadoPor);
+
+        logger.debug("Tiempo Inicial: " + tiempoInicial);
+        logger.debug("Tiempo Final: " + System.currentTimeMillis());
+
+        long tiempoTotal = System.currentTimeMillis() - tiempoInicial;
+        long tiempoTotalSec = TimeUnit.MILLISECONDS.toSeconds(tiempoTotal);
+
+        logger.debug("Tiempo Total Sec : " + tiempoTotalSec);
+
+        in.setTiempoTotal(tiempoTotalSec);
 
         ActualizaEjecucionSp o = procedure.run(in);
 
@@ -89,5 +106,21 @@ public class FinCobroTasklet implements Tasklet {
 
     public void setSuscripcionReintento(int suscripcionReintento) {
         this.suscripcionReintento = suscripcionReintento;
+    }
+
+    public long getTiempoInicial() {
+        return tiempoInicial;
+    }
+
+    public void setTiempoInicial(long tiempoInicial) {
+        this.tiempoInicial = tiempoInicial;
+    }
+
+    public String getModificadoPor() {
+        return modificadoPor;
+    }
+
+    public void setModificadoPor(String modificadoPor) {
+        this.modificadoPor = modificadoPor;
     }
 }

@@ -16,6 +16,8 @@ public class ActualizaEjecucionSp {
 
     private String modificadoPor;
 
+    private long tiempoTotal;
+
     private String codigoRpta;
 
     private String mensaje;
@@ -74,5 +76,13 @@ public class ActualizaEjecucionSp {
 
     public void setModificadoPor(String modificadoPor) {
         this.modificadoPor = modificadoPor;
+    }
+
+    public long getTiempoTotal() {
+        return tiempoTotal;
+    }
+
+    public void setTiempoTotal(long tiempoTotal) {
+        this.tiempoTotal = tiempoTotal;
     }
 }

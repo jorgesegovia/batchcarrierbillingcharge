@@ -59,12 +59,14 @@ public class GestionCobroService {
 
     private SoapClientInterceptor interceptor = new SoapClientInterceptor();
 
+    private EjecucionCobro ejecucionCobro = new EjecucionCobro();
+
     public EjecucionCobro ejecutarCobro(Suscripcion s) throws Exception {
 
-        EjecucionCobro ejecucionCobro = ejecutarCobroWs(s);
+        ejecutarCobroWs(s);
 
         if ("0000".equals(s.getCodigorpta())) {
-            ejecucionCobro = ejecutarCobroConfirmacionWs(s);
+            ejecutarCobroConfirmacionWs(s);
         }
 
         logger.debug("Suscripcion: " + s);
@@ -72,7 +74,7 @@ public class GestionCobroService {
         return ejecucionCobro;
     }
 
-    public EjecucionCobro ejecutarCobroWs(Suscripcion s) throws Exception {
+    public void ejecutarCobroWs(Suscripcion s) throws Exception {
 
         com.oracle.xmlns.carrierbilling.bpel_gestioncobro.ObjectFactory factory1
                 = new com.oracle.xmlns.carrierbilling.bpel_gestioncobro.ObjectFactory();
@@ -105,7 +107,6 @@ public class GestionCobroService {
 
         cobroWsTemplate.setInterceptors(new ClientInterceptor[]{interceptor});
 
-        EjecucionCobro cobroResp = new EjecucionCobro();
         EjecutarCobroResponseType ejecutarCobroResp = null;
         String codigoRespuestWs = null;
         String descripcionRespuestaWs = null;
@@ -154,7 +155,7 @@ public class GestionCobroService {
             if (ejecutarCobroResp.getResponseData() != null) {
                 String paymentTransactionId = ejecutarCobroResp.getResponseData().getIdtransacccion();
                 s.setPaymentTransactionId(paymentTransactionId);
-                cobroResp.setEstadocobro("Reservado");
+                ejecucionCobro.setEstadocobro("Reservado");
             }
         }
 
@@ -165,16 +166,14 @@ public class GestionCobroService {
         s.setDescripcionrpta(descripcionRespuestaWs);
 
 
-        cobroResp.setSuscripcion(s);
-        cobroResp.setWscodrpta(codigoRespuestWs);
-        cobroResp.setWsdescripcionrpta(descripcionRespuestaWs);
-        cobroResp.setServicioejec("reserva");
-        cobroResp.setWsejecucion(new Date());
-
-        return cobroResp;
+        ejecucionCobro.setSuscripcion(s);
+        ejecucionCobro.setWscodrpta(codigoRespuestWs);
+        ejecucionCobro.setWsdescripcionrpta(descripcionRespuestaWs);
+        ejecucionCobro.setServicioejec("reserva");
+        ejecucionCobro.setWsejecucion(new Date());
     }
 
-    public EjecucionCobro ejecutarCobroConfirmacionWs(Suscripcion s) throws Exception {
+    public void ejecutarCobroConfirmacionWs(Suscripcion s) throws Exception {
 
         com.oracle.xmlns.carrierbilling.bpel_gestioncobroconfirmacion.ObjectFactory factory1
                 = new com.oracle.xmlns.carrierbilling.bpel_gestioncobroconfirmacion.ObjectFactory();
@@ -220,20 +219,16 @@ public class GestionCobroService {
         s.setCodigorpta(codigoRespuestWs);
         s.setDescripcionrpta(descripcionRespuestaWs);
 
-        EjecucionCobro cobroResp = new EjecucionCobro();
-
         if ("0000".equals(codigoRespuestWs)) {
-            cobroResp.setEstadocobro("Cobrado");
+            ejecucionCobro.setEstadocobro("Cobrado");
         }
 
-        cobroResp.setSuscripcion(s);
-        cobroResp.setWscodrpta(codigoRespuestWs);
-        cobroResp.setWsdescripcionrpta(descripcionRespuestaWs);
-        cobroResp.setServicioejec("confirmacion");
-        cobroResp.setWshttpstatus(Integer.parseInt(interceptor.getHttpResponseCode()));
-        cobroResp.setWsejecucion(new Date());
+        ejecucionCobro.setSuscripcion(s);
+        ejecucionCobro.setWscodrpta(codigoRespuestWs);
+        ejecucionCobro.setWsdescripcionrpta(descripcionRespuestaWs);
+        ejecucionCobro.setServicioejec("confirmacion");
+        ejecucionCobro.setWsejecucion(new Date());
 
-        return cobroResp;
     }
 
     public WebServiceTemplate getCobroWsTemplate() {

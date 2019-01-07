@@ -30,6 +30,8 @@ public class InicioGestionCobroTasklet implements Tasklet {
     @Override
     public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
 
+        long startTime = System.currentTimeMillis();
+
         InicioCobroSp in = new InicioCobroSp();
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
@@ -57,6 +59,7 @@ public class InicioGestionCobroTasklet implements Tasklet {
         chunkContext.getStepContext().getStepExecution().getJobExecution().getExecutionContext().putInt("suscripcion_ok", 0);
         chunkContext.getStepContext().getStepExecution().getJobExecution().getExecutionContext().putInt("suscripcion_error", 0);
         chunkContext.getStepContext().getStepExecution().getJobExecution().getExecutionContext().putInt("suscripcion_reintento", 0);
+        chunkContext.getStepContext().getStepExecution().getJobExecution().getExecutionContext().putLong("tiempo_inicio", startTime);
 
         return RepeatStatus.FINISHED;
     }

@@ -27,9 +27,11 @@ public class ActualizaEjecucionStoreProcedure extends StoredProcedure {
 
     private String inParamName5;
 
-    private String outParamName6;
+    private String inParamName6;
 
     private String outParamName7;
+
+    private String outParamName8;
 
     public ActualizaEjecucionStoreProcedure(JdbcTemplate jdbcTemplate,
                                             String fullName,
@@ -38,8 +40,9 @@ public class ActualizaEjecucionStoreProcedure extends StoredProcedure {
                                             String inParamName3,
                                             String inParamName4,
                                             String inParamName5,
-                                            String outParamName6,
-                                            String outParamName7) {
+                                            String inParamName6,
+                                            String outParamName7,
+                                            String outParamName8) {
         super(jdbcTemplate, fullName);
 
         logger.debug("fullName: " + fullName);
@@ -48,8 +51,9 @@ public class ActualizaEjecucionStoreProcedure extends StoredProcedure {
         logger.debug("inParamName3: " + inParamName3);
         logger.debug("inParamName4: " + inParamName4);
         logger.debug("inParamName5: " + inParamName5);
-        logger.debug("outParamName3: " + outParamName6);
-        logger.debug("outParamName4: " + outParamName7);
+        logger.debug("inParamName6: " + inParamName6);
+        logger.debug("outParamName3: " + outParamName7);
+        logger.debug("outParamName4: " + outParamName8);
 
         this.fullName = fullName;
         this.inParamName1 = inParamName1;
@@ -57,17 +61,19 @@ public class ActualizaEjecucionStoreProcedure extends StoredProcedure {
         this.inParamName3 = inParamName3;
         this.inParamName4 = inParamName4;
         this.inParamName5 = inParamName5;
-        this.outParamName6 = outParamName6;
+        this.inParamName6 = inParamName6;
         this.outParamName7 = outParamName7;
+        this.outParamName8 = outParamName8;
 
         SqlParameter paramIn1 = new SqlParameter(inParamName1, OracleTypes.NUMBER);
         SqlParameter paramIn2 = new SqlParameter(inParamName2, OracleTypes.VARCHAR);
         SqlParameter paramIn3 = new SqlParameter(inParamName3, OracleTypes.VARCHAR);
         SqlParameter paramIn4 = new SqlParameter(inParamName4, OracleTypes.VARCHAR);
         SqlParameter paramIn5 = new SqlParameter(inParamName5, OracleTypes.VARCHAR);
-        SqlOutParameter paramOut6 = new SqlOutParameter(outParamName6, OracleTypes.VARCHAR);
+        SqlParameter paramIn6 = new SqlParameter(inParamName6, OracleTypes.NUMBER);
         SqlOutParameter paramOut7 = new SqlOutParameter(outParamName7, OracleTypes.VARCHAR);
-        SqlParameter[] paramArray = {paramIn1, paramIn2, paramIn3, paramIn4, paramIn5, paramOut6, paramOut7};
+        SqlOutParameter paramOut8 = new SqlOutParameter(outParamName8, OracleTypes.VARCHAR);
+        SqlParameter[] paramArray = {paramIn1, paramIn2, paramIn3, paramIn4, paramIn5, paramIn6, paramOut7, paramOut8};
         setFunction(false);
         setParameters(paramArray);
     }
@@ -79,15 +85,16 @@ public class ActualizaEjecucionStoreProcedure extends StoredProcedure {
         logger.debug("IN: " + inParamName3 + " -> " + o.getSuscripcionError());
         logger.debug("IN: " + inParamName4 + " -> " + o.getSuscripcionReintento());
         logger.debug("IN: " + inParamName5 + " -> " + o.getModificadoPor());
+        logger.debug("IN: " + inParamName6 + " -> " + o.getTiempoTotal());
 
         Map spResult = this.execute(o.getIdBillControl(), o.getSuscripcionOk(),
-                o.getSuscripcionError(), o.getSuscripcionReintento(), o.getModificadoPor());
+                o.getSuscripcionError(), o.getSuscripcionReintento(), o.getModificadoPor(), o.getTiempoTotal());
 
-        logger.debug("OUT: " + outParamName6 + " -> " + spResult.get(outParamName6));
         logger.debug("OUT: " + outParamName7 + " -> " + spResult.get(outParamName7));
+        logger.debug("OUT: " + outParamName8 + " -> " + spResult.get(outParamName8));
 
-        o.setCodigoRpta(String.valueOf(spResult.get(outParamName6)));
-        o.setMensaje(String.valueOf(spResult.get(outParamName7)));
+        o.setCodigoRpta(String.valueOf(spResult.get(outParamName7)));
+        o.setMensaje(String.valueOf(spResult.get(outParamName8)));
 
         return o;
     }

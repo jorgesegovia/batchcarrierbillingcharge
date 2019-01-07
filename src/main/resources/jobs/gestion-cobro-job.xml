@@ -19,6 +19,7 @@
                 <value>suscripcion_ok</value>
                 <value>suscripcion_error</value>
                 <value>suscripcion_reintento</value>
+                <value>tiempo_inicio</value>
             </array>
         </property>
         <property name="statuses">
@@ -132,6 +133,7 @@
           class="pe.com.entel.aplicacion.carrierbilling.jobs.writer.ProcesoCobroWriter"
           scope="step">
         <property name="procedure" ref="actualizaCobroStoreProcedure"/>
+        <property name="stepExecution" ref="#{stepExecution}"/>
     </bean>
 
     <bean id="gestionCobroService"
@@ -209,6 +211,8 @@
         <property name="suscripcionOk" value="#{jobExecutionContext[suscripcion_ok]}"/>
         <property name="suscripcionError" value="#{jobExecutionContext[suscripcion_error]}"/>
         <property name="suscripcionReintento" value="#{jobExecutionContext[suscripcion_reintento]}"/>
+        <property name="tiempoInicial" value="#{jobExecutionContext[tiempo_inicio]}"/>
+        <property name="modificadoPor" value="${carbill.app.userId}"/>
     </bean>
 
     <bean id="actualizaEjecucionStoreProcedure"
@@ -221,8 +225,9 @@
         <constructor-arg index="4" value="${carbill.sp.procedure.actualizaejec.inparam3}"/>
         <constructor-arg index="5" value="${carbill.sp.procedure.actualizaejec.inparam4}"/>
         <constructor-arg index="6" value="${carbill.sp.procedure.actualizaejec.inparam5}"/>
-        <constructor-arg index="7" value="${carbill.sp.procedure.actualizaejec.outparam6}"/>
+        <constructor-arg index="7" value="${carbill.sp.procedure.actualizaejec.inparam6}"/>
         <constructor-arg index="8" value="${carbill.sp.procedure.actualizaejec.outparam7}"/>
+        <constructor-arg index="9" value="${carbill.sp.procedure.actualizaejec.outparam8}"/>
     </bean>
 
 </beans>
