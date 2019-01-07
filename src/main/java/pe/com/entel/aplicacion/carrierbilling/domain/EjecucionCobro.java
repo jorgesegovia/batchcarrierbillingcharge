@@ -3,16 +3,12 @@ package pe.com.entel.aplicacion.carrierbilling.domain;
 import java.util.Date;
 
 /**
- * @version 1.0, 19/12/2018
- * @autor jsegovia
+ * @author jsegovia
+ * @version 1.0, 12/28/18
  */
-public class ActualizaCobroSp {
+public class EjecucionCobro {
 
-    private int idbillcontrol;
-
-    private int idsuscripcion;
-
-    private String estado;
+    private Suscripcion suscripcion;
 
     private String wscodrpta;
 
@@ -26,32 +22,12 @@ public class ActualizaCobroSp {
 
     private String servicioejec;
 
-    private String codigorpta;
-
-    private String mensaje;
-
-    public int getIdbillcontrol() {
-        return idbillcontrol;
+    public Suscripcion getSuscripcion() {
+        return suscripcion;
     }
 
-    public void setIdbillcontrol(int idbillcontrol) {
-        this.idbillcontrol = idbillcontrol;
-    }
-
-    public int getIdsuscripcion() {
-        return idsuscripcion;
-    }
-
-    public void setIdsuscripcion(int idsuscripcion) {
-        this.idsuscripcion = idsuscripcion;
-    }
-
-    public String getEstado() {
-        return estado;
-    }
-
-    public void setEstado(String estado) {
-        this.estado = estado;
+    public void setSuscripcion(Suscripcion suscripcion) {
+        this.suscripcion = suscripcion;
     }
 
     public String getWscodrpta() {
@@ -102,19 +78,4 @@ public class ActualizaCobroSp {
         this.servicioejec = servicioejec;
     }
 
-    public String getCodigorpta() {
-        return codigorpta;
-    }
-
-    public void setCodigorpta(String codigorpta) {
-        this.codigorpta = codigorpta;
-    }
-
-    public String getMensaje() {
-        return mensaje;
-    }
-
-    public void setMensaje(String mensaje) {
-        this.mensaje = mensaje;
-    }
 }

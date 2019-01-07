@@ -73,9 +73,9 @@
             <batch:chunk reader="procesoCobroReader"
                          processor="procesoCobroProcessor"
                          writer="procesoCobroWriter" commit-interval="1">
-            <batch:streams>
-                <batch:stream ref="procesoCobroWriter" />
-            </batch:streams>
+                <batch:streams>
+                    <batch:stream ref="procesoCobroWriter"/>
+                </batch:streams>
             </batch:chunk>
             <batch:listeners>
                 <batch:listener ref="procesoCobroStepListener"/>
@@ -168,8 +168,15 @@
         <constructor-arg index="1" value="${carbill.sp.procedure.actualizacobro.fullname}"/>
         <constructor-arg index="2" value="${carbill.sp.procedure.actualizacobro.inparam1}"/>
         <constructor-arg index="3" value="${carbill.sp.procedure.actualizacobro.inparam2}"/>
-        <constructor-arg index="4" value="${carbill.sp.procedure.actualizacobro.outparam3}"/>
-        <constructor-arg index="5" value="${carbill.sp.procedure.actualizacobro.outparam4}"/>
+        <constructor-arg index="4" value="${carbill.sp.procedure.actualizacobro.inparam3}"/>
+        <constructor-arg index="5" value="${carbill.sp.procedure.actualizacobro.inparam4}"/>
+        <constructor-arg index="6" value="${carbill.sp.procedure.actualizacobro.inparam5}"/>
+        <constructor-arg index="7" value="${carbill.sp.procedure.actualizacobro.inparam6}"/>
+        <constructor-arg index="8" value="${carbill.sp.procedure.actualizacobro.inparam7}"/>
+        <constructor-arg index="9" value="${carbill.sp.procedure.actualizacobro.inparam8}"/>
+        <constructor-arg index="10" value="${carbill.sp.procedure.actualizacobro.inparam9}"/>
+        <constructor-arg index="11" value="${carbill.sp.procedure.actualizacobro.outparam10}"/>
+        <constructor-arg index="12" value="${carbill.sp.procedure.actualizacobro.outparam11}"/>
     </bean>
 
     <bean id="regCobroPendienteStoreProcedure"
@@ -197,11 +204,11 @@
 
     <bean id="finCobroTasklet" class="pe.com.entel.aplicacion.carrierbilling.jobs.tasklet.FinCobroTasklet"
           scope="step">
-        <property name="procedure" ref="actualizaEjecucionStoreProcedure" />
-        <property name="idBillControl" value="#{jobExecutionContext[id_bill_control]}" />
-        <property name="suscripcionOk" value="#{jobExecutionContext[suscripcion_ok]}" />
-        <property name="suscripcionError" value="#{jobExecutionContext[suscripcion_error]}" />
-        <property name="suscripcionReintento" value="#{jobExecutionContext[suscripcion_reintento]}" />
+        <property name="procedure" ref="actualizaEjecucionStoreProcedure"/>
+        <property name="idBillControl" value="#{jobExecutionContext[id_bill_control]}"/>
+        <property name="suscripcionOk" value="#{jobExecutionContext[suscripcion_ok]}"/>
+        <property name="suscripcionError" value="#{jobExecutionContext[suscripcion_error]}"/>
+        <property name="suscripcionReintento" value="#{jobExecutionContext[suscripcion_reintento]}"/>
     </bean>
 
     <bean id="actualizaEjecucionStoreProcedure"

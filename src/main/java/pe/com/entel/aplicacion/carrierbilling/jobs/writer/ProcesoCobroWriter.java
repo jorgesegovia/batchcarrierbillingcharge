@@ -6,6 +6,7 @@ import org.springframework.batch.item.ItemStreamException;
 import org.springframework.batch.item.ItemStreamWriter;
 import org.springframework.batch.item.ItemWriter;
 import pe.com.entel.aplicacion.carrierbilling.domain.ActualizaCobroSp;
+import pe.com.entel.aplicacion.carrierbilling.domain.EjecucionCobro;
 import pe.com.entel.aplicacion.carrierbilling.domain.Suscripcion;
 import pe.com.entel.aplicacion.carrierbilling.repository.ActualizaCobroStoreProcedure;
 
@@ -15,34 +16,47 @@ import java.util.List;
  * @version 1.0, 17/12/2018
  * @autor jsegovia
  */
-public class ProcesoCobroWriter implements ItemWriter<Suscripcion>, ItemStreamWriter<Suscripcion> {
+public class ProcesoCobroWriter implements ItemWriter<EjecucionCobro>, ItemStreamWriter<EjecucionCobro> {
 
     static Logger logger = Logger.getLogger(ProcesoCobroWriter.class);
 
     private ActualizaCobroStoreProcedure procedure;
 
-    private int suscripcionOk;
-    private int suscripcionError;
+    private int suscripcionOk = 0;
+    private int suscripcionError = 0;
 
     @Override
-    public void write(List<? extends Suscripcion> list) throws Exception {
+    public void write(List<? extends EjecucionCobro> list) throws Exception {
 
-        for (Suscripcion s : list) {
+        for (EjecucionCobro e : list) {
+
+            Suscripcion suscripcion = e.getSuscripcion();
+
+            logger.debug("Ejecutando write: " + e.getWscodrpta() + " IdSuscripcion: " + suscripcion.getIdSuscripcion());
+
             ActualizaCobroSp o = new ActualizaCobroSp();
-            o.setIdsuscripcion(s.getIdSuscripcion());
 
-            if ("0000".equals(s.getCodigorpta())) {
-                o.setEstado("COBRADO");
+            if ("0000".equals(suscripcion.getCodigorpta())) {
+                o.setEstado("activa");
+                o.setEstadocobro("Cobrado");
                 suscripcionOk++;
             } else {
-                o.setEstado("PENDIENTE");
+                o.setEstado("pendiente");
+                o.setEstadocobro("Pendiente");
                 suscripcionError++;
             }
+
+            o.setIdsuscripcion(suscripcion.getIdSuscripcion());
+            o.setIdbillcontrol(suscripcion.getBillControl());
+            o.setWscodrpta(o.getCodigorpta());
+            o.setWsdescripcionrpta(o.getMensaje());
+            o.setWsejecucion(o.getWsejecucion());
+            o.setWshttpstatus(o.getWshttpstatus());
+            o.setServicioejec(o.getServicioejec());
 
             ActualizaCobroSp resp = procedure.run(o);
 
             if (!"0000".equals(resp.getCodigorpta())) {
-                logger.debug("Suscripcion: " + s);
                 throw new Exception("Error en el procedure");
             }
         }

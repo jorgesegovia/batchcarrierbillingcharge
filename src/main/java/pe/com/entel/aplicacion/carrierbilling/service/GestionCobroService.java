@@ -2,22 +2,35 @@ package pe.com.entel.aplicacion.carrierbilling.service;
 
 import com.oracle.xmlns.carrierbilling.bpel_gestioncobro.EjecutarCobroRequestType;
 import com.oracle.xmlns.carrierbilling.bpel_gestioncobro.EjecutarCobroResponseType;
+import com.oracle.xmlns.carrierbilling.bpel_gestioncobro.EntelFaultMessage;
 import com.oracle.xmlns.carrierbilling.bpel_gestioncobroconfirmacion.EjecutarCobroConfirmacionRequestType;
 import com.oracle.xmlns.carrierbilling.bpel_gestioncobroconfirmacion.EjecutarCobroConfirmacionResponseType;
 import org.apache.log4j.Logger;
+import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.ws.WebServiceMessage;
+import org.springframework.ws.client.WebServiceClientException;
 import org.springframework.ws.client.core.WebServiceMessageCallback;
 import org.springframework.ws.client.core.WebServiceTemplate;
+import org.springframework.ws.client.support.interceptor.ClientInterceptor;
+import org.springframework.ws.context.MessageContext;
+import org.springframework.ws.soap.SoapFaultDetail;
+import org.springframework.ws.soap.SoapFaultDetailElement;
 import org.springframework.ws.soap.SoapHeader;
 import org.springframework.ws.soap.SoapMessage;
+import org.springframework.ws.soap.client.SoapFaultClientException;
 import org.springframework.xml.transform.StringSource;
+import pe.com.entel.aplicacion.carrierbilling.domain.EjecucionCobro;
 import pe.com.entel.aplicacion.carrierbilling.domain.Suscripcion;
+import pe.com.entel.soa.data.generico.entelfault.v1.EntelFault;
 import pe.com.entel.soa.data.servicio.carrierbilling.v1.CarrierBillingCobroConfirmacionType;
 import pe.com.entel.soa.data.servicio.carrierbilling.v1.CarrierBillingCobroType;
 
+import javax.xml.bind.JAXBElement;
+import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
+import javax.xml.ws.handler.soap.SOAPMessageContext;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -44,20 +57,22 @@ public class GestionCobroService {
 
     private String userId;
 
-    public Suscripcion ejecutarCobro(Suscripcion s) throws Exception {
+    private SoapClientInterceptor interceptor = new SoapClientInterceptor();
 
-        ejecutarCobroWs(s);
+    public EjecucionCobro ejecutarCobro(Suscripcion s) throws Exception {
+
+        EjecucionCobro ejecucionCobro = ejecutarCobroWs(s);
 
         if ("0000".equals(s.getCodigorpta())) {
-            ejecutarCobroConfirmacionWs(s);
+            ejecucionCobro = ejecutarCobroConfirmacionWs(s);
         }
 
         logger.debug("Suscripcion: " + s);
 
-        return s;
+        return ejecucionCobro;
     }
 
-    public Suscripcion ejecutarCobroWs(Suscripcion s) throws Exception {
+    public EjecucionCobro ejecutarCobroWs(Suscripcion s) throws Exception {
 
         com.oracle.xmlns.carrierbilling.bpel_gestioncobro.ObjectFactory factory1
                 = new com.oracle.xmlns.carrierbilling.bpel_gestioncobro.ObjectFactory();
@@ -88,34 +103,78 @@ public class GestionCobroService {
 
         logger.info("URI: " + cobroWsTemplate.getDefaultUri());
 
-        EjecutarCobroResponseType ejecutarCobroResp = (EjecutarCobroResponseType) cobroWsTemplate.marshalSendAndReceive(ejecutarCobroReq,
-                new BpelHeaderMessageCallBack(s.getCanal(), idAplicacion, userId,
-                        todayTrxFormat, todayTrxFormat, todayfechaInicioFormat));
+        cobroWsTemplate.setInterceptors(new ClientInterceptor[]{interceptor});
+
+        EjecucionCobro cobroResp = new EjecucionCobro();
+        EjecutarCobroResponseType ejecutarCobroResp = null;
+        String codigoRespuestWs = null;
+        String descripcionRespuestaWs = null;
 
 
-        if (ejecutarCobroResp == null) {
-            throw new Exception("Respuesta del servicio Gestioncobro es null");
+        try {
+            ejecutarCobroResp = (EjecutarCobroResponseType) cobroWsTemplate.marshalSendAndReceive(ejecutarCobroReq,
+                    new BpelHeaderMessageCallBack(s.getCanal(), idAplicacion, userId,
+                            todayTrxFormat, todayTrxFormat, todayfechaInicioFormat));
+
+            codigoRespuestWs = ejecutarCobroResp.getResponseStatus().getCodigoRespuesta();
+            descripcionRespuestaWs = ejecutarCobroResp.getResponseStatus().getDescripcionRespuesta();
+
+        } catch (SoapFaultClientException e) {
+            logger.debug("e.getFaultCode() :" + e.getFaultCode());
+            logger.debug("e.getSoapFault() :" + e.getSoapFault());
+            logger.debug("e.getFaultCode().getFaultDetail() :" + e.getSoapFault().getFaultDetail());
+            logger.debug("e.getFaultCode().getFaultDetail().getResult() :" + e.getSoapFault().getFaultDetail().getResult());
+            logger.debug("e.getFaultStringOrReason() :" + e.getFaultStringOrReason());
+
+            SoapFaultDetail soapFaultDetail = e.getSoapFault().getFaultDetail();
+
+            if (soapFaultDetail == null) {
+                throw e;
+            }
+            SoapFaultDetailElement detailElementChild = (SoapFaultDetailElement) soapFaultDetail.getDetailEntries().next();
+            Source detailSource = detailElementChild.getSource();
+
+            logger.debug("detailElementChild.getSource() :" + detailElementChild.getSource());
+
+            try {
+                JAXBElement<EntelFault> jaxbEntelFault = (JAXBElement<EntelFault>) cobroWsTemplate.getUnmarshaller().unmarshal(detailSource);
+
+                if (jaxbEntelFault != null) {
+                    logger.debug("entelFault :" + jaxbEntelFault.getValue());
+                    codigoRespuestWs = jaxbEntelFault.getValue().getCodigoError();
+                    descripcionRespuestaWs = jaxbEntelFault.getValue().getCodigoError();
+                }
+
+            } catch (IOException e1) {
+                throw new IllegalArgumentException("cannot unmarshal SOAP fault detail object: " + soapFaultDetail.getSource());
+            }
         }
 
-        String codigoRespuestWs = ejecutarCobroResp.getResponseStatus().getCodigoRespuesta();
-        String descripcionRespuestaWs = ejecutarCobroResp.getResponseStatus().getDescripcionRespuesta();
+        if ("0000".equals(codigoRespuestWs)) {
+            if (ejecutarCobroResp.getResponseData() != null) {
+                String paymentTransactionId = ejecutarCobroResp.getResponseData().getIdtransacccion();
+                s.setPaymentTransactionId(paymentTransactionId);
+                cobroResp.setEstadocobro("Reservado");
+            }
+        }
+
         logger.info("Codigo Rspta: " + codigoRespuestWs);
         logger.info("Descripcion Rspta: " + descripcionRespuestaWs);
 
         s.setCodigorpta(codigoRespuestWs);
         s.setDescripcionrpta(descripcionRespuestaWs);
 
-        if ("0000".equals(codigoRespuestWs)) {
-            if (ejecutarCobroResp.getResponseData() != null) {
-                String paymentTransactionId = ejecutarCobroResp.getResponseData().getIdtransacccion();
-                s.setPaymentTransactionId(paymentTransactionId);
-            }
-        }
 
-        return s;
+        cobroResp.setSuscripcion(s);
+        cobroResp.setWscodrpta(codigoRespuestWs);
+        cobroResp.setWsdescripcionrpta(descripcionRespuestaWs);
+        cobroResp.setServicioejec("reserva");
+        cobroResp.setWsejecucion(new Date());
+
+        return cobroResp;
     }
 
-    public Suscripcion ejecutarCobroConfirmacionWs(Suscripcion s) throws Exception {
+    public EjecucionCobro ejecutarCobroConfirmacionWs(Suscripcion s) throws Exception {
 
         com.oracle.xmlns.carrierbilling.bpel_gestioncobroconfirmacion.ObjectFactory factory1
                 = new com.oracle.xmlns.carrierbilling.bpel_gestioncobroconfirmacion.ObjectFactory();
@@ -143,14 +202,16 @@ public class GestionCobroService {
 
         logger.info("URI: " + cobroWsTemplate.getDefaultUri());
 
+        cobroConfirmacionWsTemplate.setInterceptors(new ClientInterceptor[]{interceptor});
+
         EjecutarCobroConfirmacionResponseType response = (EjecutarCobroConfirmacionResponseType) cobroConfirmacionWsTemplate.marshalSendAndReceive(request,
                 new BpelHeaderMessageCallBack(s.getCanal(), idAplicacion, userId,
                         todayTrxFormat, todayTrxFormat, todayfechaInicioFormat));
 
-
         if (response == null) {
             throw new Exception("Respuesta del servicio Gestioncobroconfirmacion es null");
         }
+
 
         String codigoRespuestWs = response.getResponseStatus().getCodigoRespuesta();
         String descripcionRespuestaWs = response.getResponseStatus().getDescripcionRespuesta();
@@ -159,7 +220,20 @@ public class GestionCobroService {
         s.setCodigorpta(codigoRespuestWs);
         s.setDescripcionrpta(descripcionRespuestaWs);
 
-        return s;
+        EjecucionCobro cobroResp = new EjecucionCobro();
+
+        if ("0000".equals(codigoRespuestWs)) {
+            cobroResp.setEstadocobro("Cobrado");
+        }
+
+        cobroResp.setSuscripcion(s);
+        cobroResp.setWscodrpta(codigoRespuestWs);
+        cobroResp.setWsdescripcionrpta(descripcionRespuestaWs);
+        cobroResp.setServicioejec("confirmacion");
+        cobroResp.setWshttpstatus(Integer.parseInt(interceptor.getHttpResponseCode()));
+        cobroResp.setWsejecucion(new Date());
+
+        return cobroResp;
     }
 
     public WebServiceTemplate getCobroWsTemplate() {
@@ -228,7 +302,7 @@ public class GestionCobroService {
                 SoapMessage soapMessage = (SoapMessage) message;
                 SoapHeader header = soapMessage.getSoapHeader();
                 StringBuilder headerSb
-                        = new StringBuilder("<v1:headerRequest xmlns:v1=\"http://entel.com.pe/esb/data/generico/entelGenericHeader/v1/\">").append("\n");
+                        = new StringBuilder("<v1:headerRequest xmlns:v1=\"http://entel.com.pe/soa/data/generico/entelGenericHeader/v1/\">").append("\n");
                 headerSb.append("<v1:canal>").append(canal).append("</v1:canal>").append("\n");
                 headerSb.append("<v1:idAplicacion>").append(headerIdApp).append("</v1:idAplicacion>").append("\n");
                 headerSb.append("<v1:usuario>").append(headerUsuario).append("</v1:usuario>").append("\n");
@@ -245,6 +319,68 @@ public class GestionCobroService {
             }
         }
 
+    }
+
+    public class SoapClientInterceptor implements ClientInterceptor {
+
+        private String httpResponseCode;
+        private String httpMessage;
+
+        @Override
+        public boolean handleRequest(MessageContext messageContext) throws WebServiceClientException {
+            return false;
+        }
+
+        @Override
+        public boolean handleResponse(MessageContext messageContext) throws WebServiceClientException {
+
+
+            String[] props = messageContext.getPropertyNames();
+            logger.debug("Properties Response: ");
+            for (String prop : props) {
+                logger.debug("-> " + prop);
+            }
+
+            httpResponseCode = String.valueOf(messageContext.getProperty(SOAPMessageContext.HTTP_RESPONSE_CODE));
+            httpMessage = String.valueOf(messageContext.getProperty(SOAPMessageContext.MESSAGE_OUTBOUND_PROPERTY));
+
+            logger.info("handleResponse httpResponseCode: " + httpResponseCode);
+            logger.info("handleResponse httpMessage: " + httpMessage);
+            return false;
+        }
+
+        @Override
+        public boolean handleFault(MessageContext messageContext) throws WebServiceClientException {
+
+            String[] props = messageContext.getPropertyNames();
+            logger.debug("Properties Response: ");
+            for (String prop : props) {
+                logger.debug("-> " + prop);
+            }
+
+            httpResponseCode = String.valueOf(messageContext.getProperty(SOAPMessageContext.HTTP_RESPONSE_CODE));
+            httpMessage = String.valueOf(messageContext.getProperty(SOAPMessageContext.MESSAGE_OUTBOUND_PROPERTY));
+
+            logger.info("handleFault httpResponseCode: " + httpResponseCode);
+            logger.info("handleFault httpMessage: " + httpMessage);
+            return false;
+        }
+
+        public String getHttpResponseCode() {
+            return httpResponseCode;
+        }
+
+        public void setHttpResponseCode(String httpResponseCode) {
+            this.httpResponseCode = httpResponseCode;
+        }
+
+        public String getHttpMessage() {
+            return httpMessage;
+        }
+
+        public void setHttpMessage(String httpMessage) {
+            this.httpMessage = httpMessage;
+        }
     }
 
 }

@@ -2,6 +2,7 @@ package pe.com.entel.aplicacion.carrierbilling.jobs.processor;
 
 import org.apache.log4j.Logger;
 import org.springframework.batch.item.ItemProcessor;
+import pe.com.entel.aplicacion.carrierbilling.domain.EjecucionCobro;
 import pe.com.entel.aplicacion.carrierbilling.domain.Suscripcion;
 import pe.com.entel.aplicacion.carrierbilling.service.GestionCobroService;
 
@@ -9,26 +10,27 @@ import pe.com.entel.aplicacion.carrierbilling.service.GestionCobroService;
  * @author jsegovia
  * @version 1.0, 12/19/18
  */
-public class ProcesoCobroProcessor implements ItemProcessor<Suscripcion, Suscripcion> {
+public class ProcesoCobroProcessor implements ItemProcessor<Suscripcion, EjecucionCobro> {
 
     static Logger logger = Logger.getLogger(ProcesoCobroProcessor.class);
 
     private GestionCobroService gestionCobroService;
 
     @Override
-    public Suscripcion process(Suscripcion s) throws Exception {
-        Suscripcion resp = null;
+    public EjecucionCobro process(Suscripcion s) throws Exception {
+        EjecucionCobro cobro = null;
+
         try {
 
             logger.debug("Proceso de cobro para suscripcion: " + s.getIdSuscripcion());
 
-            resp = gestionCobroService.ejecutarCobro(s);
+            cobro = gestionCobroService.ejecutarCobro(s);
 
         } catch (Exception e) {
             logger.error(e);
         }
 
-        return resp;
+        return cobro;
     }
 
     public GestionCobroService getGestionCobroService() {
