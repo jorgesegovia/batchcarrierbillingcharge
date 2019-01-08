@@ -156,7 +156,7 @@ public class GestionCancelacionService {
 		header4.setNombre("requestTimestamp");
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 		String fecha = dateFormat.format(new Date()) + "-05:00";
-		System.out.println(fecha);
+		logger.debug(fecha);
 
 		header4.setValor(fecha);
 		listaHeaders.add(header4);
