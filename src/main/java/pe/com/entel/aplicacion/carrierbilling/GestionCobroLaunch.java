@@ -49,10 +49,8 @@ public class GestionCobroLaunch {
             Set<Long> idsJob = jobOperator.getRunningExecutions(jobName);
 
             if (idsJob == null || idsJob.size() > 0) {
-                //logger.info("Job [ " + jobName + " ] se encuentra en ejecucion. Esperando " + timeToWaitJob + " secs ...");
                 TimeUnit.SECONDS.sleep(timeToWaitJob);
             } else {
-                //logger.info("Job [ " + jobName + " ] termino de ejecutarse!");
                 break;
             }
         }
@@ -61,6 +59,8 @@ public class GestionCobroLaunch {
 
     public void start(String args[]) {
         try {
+
+            logger.info("------ Inicio Job de Cobro ------");
 
             String firstJobName = "gestionCobroJob";
 
@@ -77,7 +77,11 @@ public class GestionCobroLaunch {
 
             validatingJob(firstJobName);
 
-/*            String secondJobName = "gestionCancelacionJob";
+            logger.info("------- Fin Job de Cobro -------");
+
+            logger.info("------ Inicio Job de Terminacion ------");
+
+            String secondJobName = "gestionCancelacionJob";
 
             JobParameters secondJobParameters = new JobParametersBuilder()
                     .addString("dateProcesoStr", dateProcess)
@@ -89,7 +93,8 @@ public class GestionCobroLaunch {
             jobOperator.start(secondJobName, secondParams);
 
             validatingJob(secondJobName);
-            */
+
+            logger.info("------- Fin Job de Terminacion -------");
 
         } catch (Exception e) {
             logger.error(e);

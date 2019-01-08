@@ -114,7 +114,7 @@
     </dependencies>
 
     <build>
-        <finalName>gestioncobro-cb</finalName>
+        <finalName>batchcarrierbillingcargos</finalName>
         <extensions>
             <extension>
                 <groupId>org.apache.maven.wagon</groupId>
