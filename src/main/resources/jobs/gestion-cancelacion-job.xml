@@ -105,6 +105,10 @@
         <constructor-arg index="1" value="${carbill.rest.token.metodo}"/>
         <constructor-arg index="2" value="${carbill.rest.terminar.url}" />
         <constructor-arg index="3" value="${carbill.rest.terminar.metodo}" />
+        <constructor-arg index="4" value="${carbill.rest.token.header.1}" />
+        <constructor-arg index="5" value="${carbill.rest.terminar.header.1}" />
+        <constructor-arg index="6" value="${carbill.rest.terminar.header.2}" />
+        <constructor-arg index="7" value="${carbill.rest.terminar.header.3}" />
     </bean>    
 
 </beans>

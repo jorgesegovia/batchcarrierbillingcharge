@@ -14,8 +14,8 @@ public class ProcesoCancelacionRowMapper implements RowMapper<Suscripcion>{
     @Override
     public Suscripcion mapRow(ResultSet rs, int i) throws SQLException {
 
-        //logger.debug("ResultSet = " + rs);
-        //logger.debug("i = " + i);
+        logger.debug("ResultSet = " + rs);
+        logger.debug("i = " + i);
 
         Suscripcion s = new Suscripcion();
 
