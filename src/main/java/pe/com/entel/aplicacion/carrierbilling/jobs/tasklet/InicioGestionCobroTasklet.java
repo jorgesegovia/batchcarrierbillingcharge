@@ -61,6 +61,8 @@ public class InicioGestionCobroTasklet implements Tasklet {
         chunkContext.getStepContext().getStepExecution().getJobExecution().getExecutionContext().putInt("suscripcion_reintento", 0);
         chunkContext.getStepContext().getStepExecution().getJobExecution().getExecutionContext().putLong("tiempo_inicio", startTime);
 
+        logger.info("Se encontraron [ " + o.getCantidadSuscripciones() + " ] suscripcione(s) para procesar agrupadas en [ " + o.getNumeroPaginas() + " ] lote(s)");
+
         return RepeatStatus.FINISHED;
     }
 

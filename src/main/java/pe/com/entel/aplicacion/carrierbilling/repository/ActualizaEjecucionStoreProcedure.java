@@ -45,7 +45,7 @@ public class ActualizaEjecucionStoreProcedure extends StoredProcedure {
                                             String outParamName8) {
         super(jdbcTemplate, fullName);
 
-        logger.debug("fullName: " + fullName);
+        logger.info("Ejecutando procedure: " + fullName);
         logger.debug("inParamName1: " + inParamName1);
         logger.debug("inParamName2: " + inParamName2);
         logger.debug("inParamName3: " + inParamName3);
@@ -80,18 +80,18 @@ public class ActualizaEjecucionStoreProcedure extends StoredProcedure {
 
     public ActualizaEjecucionSp run(ActualizaEjecucionSp o) throws Exception {
 
-        logger.debug("IN: " + inParamName1 + " -> " + o.getIdBillControl());
-        logger.debug("IN: " + inParamName2 + " -> " + o.getSuscripcionOk());
-        logger.debug("IN: " + inParamName3 + " -> " + o.getSuscripcionError());
-        logger.debug("IN: " + inParamName4 + " -> " + o.getSuscripcionReintento());
-        logger.debug("IN: " + inParamName5 + " -> " + o.getModificadoPor());
-        logger.debug("IN: " + inParamName6 + " -> " + o.getTiempoTotal());
+        logger.info("IN: " + inParamName1 + " <- " + o.getIdBillControl());
+        logger.info("IN: " + inParamName2 + " <- " + o.getSuscripcionOk());
+        logger.info("IN: " + inParamName3 + " <- " + o.getSuscripcionError());
+        logger.info("IN: " + inParamName4 + " <- " + o.getSuscripcionReintento());
+        logger.info("IN: " + inParamName5 + " <- " + o.getModificadoPor());
+        logger.info("IN: " + inParamName6 + " <- " + o.getTiempoTotal());
 
         Map spResult = this.execute(o.getIdBillControl(), o.getSuscripcionOk(),
                 o.getSuscripcionError(), o.getSuscripcionReintento(), o.getModificadoPor(), o.getTiempoTotal());
 
-        logger.debug("OUT: " + outParamName7 + " -> " + spResult.get(outParamName7));
-        logger.debug("OUT: " + outParamName8 + " -> " + spResult.get(outParamName8));
+        logger.info("OUT: " + outParamName7 + " -> " + spResult.get(outParamName7));
+        logger.info("OUT: " + outParamName8 + " -> " + spResult.get(outParamName8));
 
         o.setCodigoRpta(String.valueOf(spResult.get(outParamName7)));
         o.setMensaje(String.valueOf(spResult.get(outParamName8)));

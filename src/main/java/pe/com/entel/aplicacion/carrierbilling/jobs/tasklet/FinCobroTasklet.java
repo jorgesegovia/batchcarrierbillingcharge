@@ -53,7 +53,7 @@ public class FinCobroTasklet implements Tasklet {
         long tiempoTotal = System.currentTimeMillis() - tiempoInicial;
         long tiempoTotalSec = TimeUnit.MILLISECONDS.toSeconds(tiempoTotal);
 
-        logger.debug("Tiempo Total Sec : " + tiempoTotalSec);
+        logger.info("Tiempo Total Sec : " + tiempoTotalSec);
 
         in.setTiempoTotal(tiempoTotalSec);
 

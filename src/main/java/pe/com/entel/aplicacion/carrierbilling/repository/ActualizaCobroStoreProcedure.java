@@ -18,7 +18,6 @@ public class ActualizaCobroStoreProcedure extends StoredProcedure {
     private String fullName;
     private String inParamName1;
     private String inParamName2;
-    private String inParamName3;
     private String inParamName4;
     private String inParamName5;
     private String inParamName6;
@@ -32,7 +31,6 @@ public class ActualizaCobroStoreProcedure extends StoredProcedure {
                                         String fullName,
                                         String inParamName1,
                                         String inParamName2,
-                                        String inParamName3,
                                         String inParamName4,
                                         String inParamName5,
                                         String inParamName6,
@@ -43,10 +41,9 @@ public class ActualizaCobroStoreProcedure extends StoredProcedure {
                                         String outParamName11) {
         super(jdbcTemplate, fullName);
 
-        logger.debug("fullName: " + fullName);
+        logger.info("Ejecutando procedure: " + fullName);
         logger.debug("inParamName1: " + inParamName1);
         logger.debug("inParamName2: " + inParamName2);
-        logger.debug("inParamName3: " + inParamName3);
         logger.debug("inParamName4: " + inParamName4);
         logger.debug("inParamName5: " + inParamName5);
         logger.debug("inParamName6: " + inParamName6);
@@ -59,7 +56,6 @@ public class ActualizaCobroStoreProcedure extends StoredProcedure {
         this.fullName = fullName;
         this.inParamName1 = inParamName1;
         this.inParamName2 = inParamName2;
-        this.inParamName3 = inParamName3;
         this.inParamName4 = inParamName4;
         this.inParamName5 = inParamName5;
         this.inParamName6 = inParamName6;
@@ -71,7 +67,6 @@ public class ActualizaCobroStoreProcedure extends StoredProcedure {
 
         SqlParameter paramIn1 = new SqlParameter(inParamName1, OracleTypes.NUMBER);
         SqlParameter paramIn2 = new SqlParameter(inParamName2, OracleTypes.NUMBER);
-        SqlParameter paramIn3 = new SqlParameter(inParamName3, OracleTypes.VARCHAR);
         SqlParameter paramIn4 = new SqlParameter(inParamName4, OracleTypes.VARCHAR);
         SqlParameter paramIn5 = new SqlParameter(inParamName5, OracleTypes.VARCHAR);
         SqlParameter paramIn6 = new SqlParameter(inParamName6, OracleTypes.DATE);
@@ -80,7 +75,7 @@ public class ActualizaCobroStoreProcedure extends StoredProcedure {
         SqlParameter paramIn9 = new SqlParameter(inParamName9, OracleTypes.VARCHAR);
         SqlOutParameter paramOut10 = new SqlOutParameter(outParamName10, OracleTypes.VARCHAR);
         SqlOutParameter paramOut11 = new SqlOutParameter(outParamName11, OracleTypes.VARCHAR);
-        SqlParameter[] paramArray = {paramIn1, paramIn2, paramIn3, paramIn4, paramIn5,
+        SqlParameter[] paramArray = {paramIn1, paramIn2, paramIn4, paramIn5,
                 paramIn6, paramIn7, paramIn8, paramIn9, paramOut10, paramOut11};
         setFunction(false);
         setParameters(paramArray);
@@ -90,7 +85,6 @@ public class ActualizaCobroStoreProcedure extends StoredProcedure {
 
         logger.debug("IN: " + inParamName1 + " -> " + o.getIdbillcontrol());
         logger.debug("IN: " + inParamName2 + " -> " + o.getIdsuscripcion());
-        logger.debug("IN: " + inParamName3 + " -> " + o.getEstado());
         logger.debug("IN: " + inParamName4 + " -> " + o.getWscodrpta());
         logger.debug("IN: " + inParamName5 + " -> " + o.getWsdescripcionrpta());
         logger.debug("IN: " + inParamName6 + " -> " + o.getWsejecucion());
@@ -98,12 +92,12 @@ public class ActualizaCobroStoreProcedure extends StoredProcedure {
         logger.debug("IN: " + inParamName8 + " -> " + o.getEstadocobro());
         logger.debug("IN: " + inParamName9 + " -> " + o.getServicioejec());
 
-        Map spResult = this.execute(o.getIdbillcontrol(), o.getIdsuscripcion(), o.getEstado(), o.getWscodrpta(),
+        Map spResult = this.execute(o.getIdbillcontrol(), o.getIdsuscripcion(), o.getWscodrpta(),
                 o.getWsdescripcionrpta(), o.getWsejecucion(), o.getWshttpstatus(),
                 o.getEstadocobro(), o.getServicioejec());
 
-        logger.debug("OUT: " + outParamName10 + " -> " + spResult.get(outParamName10));
-        logger.debug("OUT: " + outParamName11 + " -> " + spResult.get(outParamName11));
+        logger.info("OUT: " + outParamName10 + " -> " + spResult.get(outParamName10));
+        logger.info("OUT: " + outParamName11 + " -> " + spResult.get(outParamName11));
 
         o.setCodigorpta(String.valueOf(spResult.get(outParamName10)));
         o.setMensaje(String.valueOf(spResult.get(outParamName11)));

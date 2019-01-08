@@ -133,7 +133,6 @@
           class="pe.com.entel.aplicacion.carrierbilling.jobs.writer.ProcesoCobroWriter"
           scope="step">
         <property name="procedure" ref="actualizaCobroStoreProcedure"/>
-        <property name="stepExecution" ref="#{stepExecution}"/>
     </bean>
 
     <bean id="gestionCobroService"
@@ -170,15 +169,14 @@
         <constructor-arg index="1" value="${carbill.sp.procedure.actualizacobro.fullname}"/>
         <constructor-arg index="2" value="${carbill.sp.procedure.actualizacobro.inparam1}"/>
         <constructor-arg index="3" value="${carbill.sp.procedure.actualizacobro.inparam2}"/>
-        <constructor-arg index="4" value="${carbill.sp.procedure.actualizacobro.inparam3}"/>
-        <constructor-arg index="5" value="${carbill.sp.procedure.actualizacobro.inparam4}"/>
-        <constructor-arg index="6" value="${carbill.sp.procedure.actualizacobro.inparam5}"/>
-        <constructor-arg index="7" value="${carbill.sp.procedure.actualizacobro.inparam6}"/>
-        <constructor-arg index="8" value="${carbill.sp.procedure.actualizacobro.inparam7}"/>
-        <constructor-arg index="9" value="${carbill.sp.procedure.actualizacobro.inparam8}"/>
-        <constructor-arg index="10" value="${carbill.sp.procedure.actualizacobro.inparam9}"/>
-        <constructor-arg index="11" value="${carbill.sp.procedure.actualizacobro.outparam10}"/>
-        <constructor-arg index="12" value="${carbill.sp.procedure.actualizacobro.outparam11}"/>
+        <constructor-arg index="4" value="${carbill.sp.procedure.actualizacobro.inparam4}"/>
+        <constructor-arg index="5" value="${carbill.sp.procedure.actualizacobro.inparam5}"/>
+        <constructor-arg index="6" value="${carbill.sp.procedure.actualizacobro.inparam6}"/>
+        <constructor-arg index="7" value="${carbill.sp.procedure.actualizacobro.inparam7}"/>
+        <constructor-arg index="8" value="${carbill.sp.procedure.actualizacobro.inparam8}"/>
+        <constructor-arg index="9" value="${carbill.sp.procedure.actualizacobro.inparam9}"/>
+        <constructor-arg index="10" value="${carbill.sp.procedure.actualizacobro.outparam10}"/>
+        <constructor-arg index="11" value="${carbill.sp.procedure.actualizacobro.outparam11}"/>
     </bean>
 
     <bean id="regCobroPendienteStoreProcedure"
@@ -192,13 +190,14 @@
         <constructor-arg index="5" value="${carbill.sp.procedure.recobropendiente.outparam4}"/>
         <constructor-arg index="6" value="${carbill.sp.procedure.recobropendiente.outparam5}"/>
         <constructor-arg index="7" value="${carbill.sp.procedure.recobropendiente.outparam6}"/>
+        <constructor-arg index="8" value="${carbill.sp.procedure.recobropendiente.outparam7}"/>
     </bean>
 
     <!-- Step 3 -->
 
     <batch:step id="findCobroStepParent">
         <batch:tasklet ref="finCobroTasklet">
-            <batch:listeners>
+            <batch:listeners>S
                 <batch:listener ref="promotionListener"/>
             </batch:listeners>
         </batch:tasklet>

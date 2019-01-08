@@ -29,6 +29,8 @@ public class RegCobroPendienteStoreProcedure extends StoredProcedure {
 
     private String outParamName6;
 
+    private String outParamName7;
+
     public RegCobroPendienteStoreProcedure(JdbcTemplate jdbcTemplate,
                                            String fullName,
                                            String inParamName1,
@@ -36,16 +38,18 @@ public class RegCobroPendienteStoreProcedure extends StoredProcedure {
                                            String outParamName3,
                                            String outParamName4,
                                            String outParamName5,
-                                           String outParamName6) {
+                                           String outParamName6,
+                                           String outParamName7) {
         super(jdbcTemplate, fullName);
 
-        logger.debug("fullName: " + fullName);
+        logger.info("Ejecutando procedure: " + fullName);
         logger.debug("inParamName1: " + inParamName1);
         logger.debug("inParamName2: " + inParamName2);
         logger.debug("outParamName3: " + outParamName3);
         logger.debug("outParamName4: " + outParamName4);
         logger.debug("outParamName5: " + outParamName5);
         logger.debug("outParamName6: " + outParamName6);
+        logger.debug("outParamName7: " + outParamName7);
 
         this.fullName = fullName;
         this.inParamName1 = inParamName1;
@@ -54,6 +58,7 @@ public class RegCobroPendienteStoreProcedure extends StoredProcedure {
         this.outParamName4 = outParamName4;
         this.outParamName5 = outParamName5;
         this.outParamName6 = outParamName6;
+        this.outParamName7 = outParamName7;
 
         SqlParameter paramIn1 = new SqlParameter(inParamName1, OracleTypes.DATE);
         SqlParameter paramIn2 = new SqlParameter(inParamName2, OracleTypes.VARCHAR);
@@ -61,27 +66,30 @@ public class RegCobroPendienteStoreProcedure extends StoredProcedure {
         SqlOutParameter paramOut4 = new SqlOutParameter(outParamName4, OracleTypes.NUMERIC);
         SqlOutParameter paramOut5 = new SqlOutParameter(outParamName5, OracleTypes.VARCHAR);
         SqlOutParameter paramOut6 = new SqlOutParameter(outParamName6, OracleTypes.VARCHAR);
-        SqlParameter[] paramArray = {paramIn1, paramIn2, paramOut3, paramOut4, paramOut5, paramOut6};
+        SqlOutParameter paramOut7 = new SqlOutParameter(outParamName7, OracleTypes.NUMERIC);
+        SqlParameter[] paramArray = {paramIn1, paramIn2, paramOut3, paramOut4, paramOut5, paramOut6, paramOut7};
         setFunction(false);
         setParameters(paramArray);
     }
 
     public InicioCobroSp run(InicioCobroSp o) throws Exception {
 
-        logger.debug("IN: " + inParamName1 + " -> " + o.getFechaCobro());
-        logger.debug("IN: " + inParamName2 + " -> " + o.getCreadoPor());
+        logger.info("IN: " + inParamName1 + " <- " + o.getFechaCobro());
+        logger.info("IN: " + inParamName2 + " <- " + o.getCreadoPor());
 
         Map spResult = this.execute(o.getFechaCobro(), o.getCreadoPor());
 
-        logger.debug("OUT: " + outParamName3 + " -> " + spResult.get(outParamName3));
-        logger.debug("OUT: " + outParamName4 + " -> " + spResult.get(outParamName4));
-        logger.debug("OUT: " + outParamName5 + " -> " + spResult.get(outParamName5));
-        logger.debug("OUT: " + outParamName6 + " -> " + spResult.get(outParamName6));
+        logger.info("OUT: " + outParamName3 + " -> " + spResult.get(outParamName3));
+        logger.info("OUT: " + outParamName4 + " -> " + spResult.get(outParamName4));
+        logger.info("OUT: " + outParamName5 + " -> " + spResult.get(outParamName5));
+        logger.info("OUT: " + outParamName6 + " -> " + spResult.get(outParamName6));
+        logger.info("OUT: " + outParamName7 + " -> " + spResult.get(outParamName7));
 
         o.setIdBillControl(Integer.parseInt(String.valueOf(spResult.get(outParamName3))));
         o.setNumeroPaginas(Integer.parseInt(String.valueOf(spResult.get(outParamName4))));
         o.setCodigoRpta(String.valueOf(spResult.get(outParamName5)));
         o.setMensaje(String.valueOf(spResult.get(outParamName6)));
+        o.setCantidadSuscripciones(Integer.parseInt(String.valueOf(spResult.get(outParamName7))));
 
         return o;
     }

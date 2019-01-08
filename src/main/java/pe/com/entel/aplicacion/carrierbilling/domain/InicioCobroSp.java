@@ -14,6 +14,7 @@ public class InicioCobroSp {
     private String codigoRpta;
     private String mensaje;
     private int idBillControl;
+    private int cantidadSuscripciones;
 
     public Date getFechaCobro() {
         return fechaCobro;
@@ -61,6 +62,14 @@ public class InicioCobroSp {
 
     public void setIdBillControl(int idBillControl) {
         this.idBillControl = idBillControl;
+    }
+
+    public int getCantidadSuscripciones() {
+        return cantidadSuscripciones;
+    }
+
+    public void setCantidadSuscripciones(int cantidadSuscripciones) {
+        this.cantidadSuscripciones = cantidadSuscripciones;
     }
 
     @Override

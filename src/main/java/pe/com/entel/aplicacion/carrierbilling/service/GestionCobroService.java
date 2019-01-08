@@ -5,6 +5,7 @@ import com.oracle.xmlns.carrierbilling.bpel_gestioncobro.EjecutarCobroResponseTy
 import com.oracle.xmlns.carrierbilling.bpel_gestioncobro.EntelFaultMessage;
 import com.oracle.xmlns.carrierbilling.bpel_gestioncobroconfirmacion.EjecutarCobroConfirmacionRequestType;
 import com.oracle.xmlns.carrierbilling.bpel_gestioncobroconfirmacion.EjecutarCobroConfirmacionResponseType;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.ws.WebServiceMessage;
@@ -63,6 +64,8 @@ public class GestionCobroService {
 
     public EjecucionCobro ejecutarCobro(Suscripcion s) throws Exception {
 
+        logger.info("Ejecutando cobro para suscripcion [ " + s.getIdSuscripcion() + " ] ...");
+
         ejecutarCobroWs(s);
 
         if ("0000".equals(s.getCodigorpta())) {
@@ -103,7 +106,7 @@ public class GestionCobroService {
         SimpleDateFormat fechaInicioFormat = new SimpleDateFormat(FECHAINICIO_DATE_FORMAT);
         String todayfechaInicioFormat = fechaInicioFormat.format(new Date());
 
-        logger.info("URI: " + cobroWsTemplate.getDefaultUri());
+        logger.debug("URI: " + cobroWsTemplate.getDefaultUri());
 
         cobroWsTemplate.setInterceptors(new ClientInterceptor[]{interceptor});
 
@@ -151,26 +154,29 @@ public class GestionCobroService {
             }
         }
 
+        s.setCodigorpta(codigoRespuestWs);
+        s.setDescripcionrpta(descripcionRespuestaWs);
+
+        logger.info("RESERVA Codigo -> [ " + codigoRespuestWs + " ]");
+        logger.info("RESERVA Mensaje -> [ " + StringUtils.left(descripcionRespuestaWs, 150) + " ]");
+
         if ("0000".equals(codigoRespuestWs)) {
             if (ejecutarCobroResp.getResponseData() != null) {
                 String paymentTransactionId = ejecutarCobroResp.getResponseData().getIdtransacccion();
                 s.setPaymentTransactionId(paymentTransactionId);
                 ejecucionCobro.setEstadocobro("Reservado");
+                logger.info("RESERVA ... [ OK ]");
             }
+        } else {
+            logger.info("RESERVA ... [ FALLO ]");
         }
-
-        logger.info("Codigo Rspta: " + codigoRespuestWs);
-        logger.info("Descripcion Rspta: " + descripcionRespuestaWs);
-
-        s.setCodigorpta(codigoRespuestWs);
-        s.setDescripcionrpta(descripcionRespuestaWs);
-
 
         ejecucionCobro.setSuscripcion(s);
         ejecucionCobro.setWscodrpta(codigoRespuestWs);
         ejecucionCobro.setWsdescripcionrpta(descripcionRespuestaWs);
         ejecucionCobro.setServicioejec("reserva");
         ejecucionCobro.setWsejecucion(new Date());
+
     }
 
     public void ejecutarCobroConfirmacionWs(Suscripcion s) throws Exception {
@@ -199,28 +205,64 @@ public class GestionCobroService {
         SimpleDateFormat fechaInicioFormat = new SimpleDateFormat(FECHAINICIO_DATE_FORMAT);
         String todayfechaInicioFormat = fechaInicioFormat.format(new Date());
 
-        logger.info("URI: " + cobroWsTemplate.getDefaultUri());
+        logger.debug("URI: " + cobroWsTemplate.getDefaultUri());
 
-        cobroConfirmacionWsTemplate.setInterceptors(new ClientInterceptor[]{interceptor});
+        String codigoRespuestWs = null;
+        String descripcionRespuestaWs = null;
 
-        EjecutarCobroConfirmacionResponseType response = (EjecutarCobroConfirmacionResponseType) cobroConfirmacionWsTemplate.marshalSendAndReceive(request,
-                new BpelHeaderMessageCallBack(s.getCanal(), idAplicacion, userId,
-                        todayTrxFormat, todayTrxFormat, todayfechaInicioFormat));
+        try {
 
-        if (response == null) {
-            throw new Exception("Respuesta del servicio Gestioncobroconfirmacion es null");
+            cobroConfirmacionWsTemplate.setInterceptors(new ClientInterceptor[]{interceptor});
+
+            EjecutarCobroConfirmacionResponseType response = (EjecutarCobroConfirmacionResponseType) cobroConfirmacionWsTemplate.marshalSendAndReceive(request,
+                    new BpelHeaderMessageCallBack(s.getCanal(), idAplicacion, userId,
+                            todayTrxFormat, todayTrxFormat, todayfechaInicioFormat));
+
+            codigoRespuestWs = response.getResponseStatus().getCodigoRespuesta();
+            descripcionRespuestaWs = response.getResponseStatus().getDescripcionRespuesta();
+
+        } catch (SoapFaultClientException e) {
+            logger.debug("e.getFaultCode() :" + e.getFaultCode());
+            logger.debug("e.getSoapFault() :" + e.getSoapFault());
+            logger.debug("e.getFaultCode().getFaultDetail() :" + e.getSoapFault().getFaultDetail());
+            logger.debug("e.getFaultCode().getFaultDetail().getResult() :" + e.getSoapFault().getFaultDetail().getResult());
+            logger.debug("e.getFaultStringOrReason() :" + e.getFaultStringOrReason());
+
+            SoapFaultDetail soapFaultDetail = e.getSoapFault().getFaultDetail();
+
+            if (soapFaultDetail == null) {
+                throw e;
+            }
+            SoapFaultDetailElement detailElementChild = (SoapFaultDetailElement) soapFaultDetail.getDetailEntries().next();
+            Source detailSource = detailElementChild.getSource();
+
+            logger.debug("detailElementChild.getSource() :" + detailElementChild.getSource());
+
+            try {
+                JAXBElement<EntelFault> jaxbEntelFault = (JAXBElement<EntelFault>) cobroConfirmacionWsTemplate.getUnmarshaller().unmarshal(detailSource);
+
+                if (jaxbEntelFault != null) {
+                    logger.debug("entelFault :" + jaxbEntelFault.getValue());
+                    codigoRespuestWs = jaxbEntelFault.getValue().getCodigoError();
+                    descripcionRespuestaWs = jaxbEntelFault.getValue().getCodigoError();
+                }
+
+            } catch (IOException e1) {
+                throw new IllegalArgumentException("cannot unmarshal SOAP fault detail object: " + soapFaultDetail.getSource());
+            }
         }
 
+        logger.info("CONFIRMACIOM Codigo -> [ " + codigoRespuestWs + " ]");
+        logger.info("CONFIRMACION Mensaje -> [ " + StringUtils.left(descripcionRespuestaWs, 150) + " ]");
 
-        String codigoRespuestWs = response.getResponseStatus().getCodigoRespuesta();
-        String descripcionRespuestaWs = response.getResponseStatus().getDescripcionRespuesta();
-        logger.info("Codigo Rspta: " + codigoRespuestWs);
-        logger.info("Descripcion Rspta: " + descripcionRespuestaWs);
         s.setCodigorpta(codigoRespuestWs);
         s.setDescripcionrpta(descripcionRespuestaWs);
 
         if ("0000".equals(codigoRespuestWs)) {
             ejecucionCobro.setEstadocobro("Cobrado");
+            logger.info("CONFIRMACIOM ... [ OK ]");
+        } else {
+            logger.info("CONFIRMACIOM ... [ FALLO ]");
         }
 
         ejecucionCobro.setSuscripcion(s);
@@ -228,7 +270,6 @@ public class GestionCobroService {
         ejecucionCobro.setWsdescripcionrpta(descripcionRespuestaWs);
         ejecucionCobro.setServicioejec("confirmacion");
         ejecucionCobro.setWsejecucion(new Date());
-
     }
 
     public WebServiceTemplate getCobroWsTemplate() {
@@ -339,8 +380,8 @@ public class GestionCobroService {
             httpResponseCode = String.valueOf(messageContext.getProperty(SOAPMessageContext.HTTP_RESPONSE_CODE));
             httpMessage = String.valueOf(messageContext.getProperty(SOAPMessageContext.MESSAGE_OUTBOUND_PROPERTY));
 
-            logger.info("handleResponse httpResponseCode: " + httpResponseCode);
-            logger.info("handleResponse httpMessage: " + httpMessage);
+            logger.debug("handleResponse httpResponseCode: " + httpResponseCode);
+            logger.debug("handleResponse httpMessage: " + httpMessage);
             return false;
         }
 
@@ -356,8 +397,8 @@ public class GestionCobroService {
             httpResponseCode = String.valueOf(messageContext.getProperty(SOAPMessageContext.HTTP_RESPONSE_CODE));
             httpMessage = String.valueOf(messageContext.getProperty(SOAPMessageContext.MESSAGE_OUTBOUND_PROPERTY));
 
-            logger.info("handleFault httpResponseCode: " + httpResponseCode);
-            logger.info("handleFault httpMessage: " + httpMessage);
+            logger.debug("handleFault httpResponseCode: " + httpResponseCode);
+            logger.debug("handleFault httpMessage: " + httpMessage);
             return false;
         }
 

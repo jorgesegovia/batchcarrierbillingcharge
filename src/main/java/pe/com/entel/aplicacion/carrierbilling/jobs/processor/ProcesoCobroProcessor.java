@@ -21,11 +21,7 @@ public class ProcesoCobroProcessor implements ItemProcessor<Suscripcion, Ejecuci
         EjecucionCobro cobro = null;
 
         try {
-
-            logger.debug("Proceso de cobro para suscripcion: " + s.getIdSuscripcion());
-
             cobro = gestionCobroService.ejecutarCobro(s);
-
         } catch (Exception e) {
             logger.error(e);
         }

@@ -10,7 +10,6 @@ import pe.com.entel.aplicacion.carrierbilling.domain.EjecucionCobro;
 import pe.com.entel.aplicacion.carrierbilling.domain.Suscripcion;
 import pe.com.entel.aplicacion.carrierbilling.repository.ActualizaCobroStoreProcedure;
 
-import javax.batch.runtime.StepExecution;
 import java.util.List;
 
 /**
@@ -27,8 +26,6 @@ public class ProcesoCobroWriter implements ItemWriter<EjecucionCobro>, ItemStrea
 
     private int suscripcionError = 0;
 
-    private StepExecution stepExecution;
-
     @Override
     public void write(List<? extends EjecucionCobro> list) throws Exception {
 
@@ -41,15 +38,13 @@ public class ProcesoCobroWriter implements ItemWriter<EjecucionCobro>, ItemStrea
             ActualizaCobroSp o = new ActualizaCobroSp();
 
             if ("0000".equals(suscripcion.getCodigorpta())) {
-                o.setEstado("activa");
                 o.setEstadocobro("Cobrado");
                 suscripcionOk++;
-                logger.debug("IdSuscripcion: " + suscripcion.getIdSuscripcion() + " ejecutada OK ");
+                logger.info("Suscripcion con codigo [ " + suscripcion.getCodigorpta() + " ] cobrada OK!");
             } else {
-                o.setEstado("pendiente");
                 o.setEstadocobro("Pendiente");
                 suscripcionError++;
-                logger.debug("IdSuscripcion: " + suscripcion.getIdSuscripcion() + " ejecutada con ERROR ");
+                logger.info("Suscripcion con codigo [ " + suscripcion.getCodigorpta() + " ] NO hasido cobradad!");
             }
 
             o.setIdsuscripcion(suscripcion.getIdSuscripcion());
@@ -100,13 +95,5 @@ public class ProcesoCobroWriter implements ItemWriter<EjecucionCobro>, ItemStrea
     @Override
     public void close() throws ItemStreamException {
 
-    }
-
-    public StepExecution getStepExecution() {
-        return stepExecution;
-    }
-
-    public void setStepExecution(StepExecution stepExecution) {
-        this.stepExecution = stepExecution;
     }
 }
