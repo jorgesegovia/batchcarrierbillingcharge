@@ -205,7 +205,7 @@ public class GestionCobroService {
         SimpleDateFormat fechaInicioFormat = new SimpleDateFormat(FECHAINICIO_DATE_FORMAT);
         String todayfechaInicioFormat = fechaInicioFormat.format(new Date());
 
-        logger.debug("URI: " + cobroWsTemplate.getDefaultUri());
+        logger.debug("URI: " + cobroConfirmacionWsTemplate.getDefaultUri());
 
         String codigoRespuestWs = null;
         String descripcionRespuestaWs = null;

@@ -32,18 +32,18 @@ public class ProcesoCobroStepListener implements StepExecutionListener {
 
             if (paginaActual <= totalPaginas) {
                 stepExecution.setExitStatus(new ExitStatus("REPEAT"));
-                logger.debug("ExitStatus: REPEAT");
+                logger.info("Se inicia ejecucion del siguiente Lote ...");
             } else {
                 stepExecution.setExitStatus(ExitStatus.COMPLETED);
-                logger.debug("ExitStatus: " + ExitStatus.COMPLETED.toString());
+                logger.info("Fin de la ejecucion de Lotes.");
             }
 
         } catch (NumberFormatException e) {
             logger.error(e);
         }
 
-        logger.info("Total de suscripciones Ok = " + stepExecution.getExecutionContext().getInt("suscripcion_ok"));
-        logger.info("Total de suscripciones Error = " + stepExecution.getExecutionContext().getInt("suscripcion_error"));
+        logger.debug("Total de suscripciones Ok = " + stepExecution.getExecutionContext().getInt("suscripcion_ok"));
+        logger.debug("Total de suscripciones Error = " + stepExecution.getExecutionContext().getInt("suscripcion_error"));
 
         return stepExecution.getExitStatus();
     }

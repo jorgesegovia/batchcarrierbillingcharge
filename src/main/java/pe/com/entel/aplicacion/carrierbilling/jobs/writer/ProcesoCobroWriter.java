@@ -1,14 +1,12 @@
 package pe.com.entel.aplicacion.carrierbilling.jobs.writer;
 
 import org.apache.log4j.Logger;
-import org.springframework.batch.item.ExecutionContext;
-import org.springframework.batch.item.ItemStreamException;
-import org.springframework.batch.item.ItemStreamWriter;
 import org.springframework.batch.item.ItemWriter;
 import pe.com.entel.aplicacion.carrierbilling.domain.ActualizaCobroSp;
 import pe.com.entel.aplicacion.carrierbilling.domain.EjecucionCobro;
 import pe.com.entel.aplicacion.carrierbilling.domain.Suscripcion;
 import pe.com.entel.aplicacion.carrierbilling.repository.ActualizaCobroStoreProcedure;
+import pe.com.entel.aplicacion.carrierbilling.util.MountSuscriptionsExecuted;
 
 import java.util.List;
 
@@ -16,15 +14,13 @@ import java.util.List;
  * @version 1.0, 17/12/2018
  * @autor jsegovia
  */
-public class ProcesoCobroWriter implements ItemWriter<EjecucionCobro>, ItemStreamWriter<EjecucionCobro> {
+public class ProcesoCobroWriter implements ItemWriter<EjecucionCobro> {
 
     static Logger logger = Logger.getLogger(ProcesoCobroWriter.class);
 
     private ActualizaCobroStoreProcedure procedure;
 
-    private int suscripcionOk = 0;
-
-    private int suscripcionError = 0;
+    private MountSuscriptionsExecuted mountSuscriptionsExecuted;
 
     @Override
     public void write(List<? extends EjecucionCobro> list) throws Exception {
@@ -39,12 +35,12 @@ public class ProcesoCobroWriter implements ItemWriter<EjecucionCobro>, ItemStrea
 
             if ("0000".equals(suscripcion.getCodigorpta())) {
                 o.setEstadocobro("Cobrado");
-                suscripcionOk++;
+                mountSuscriptionsExecuted.addSuscriptionOk();
                 logger.info("Suscripcion con codigo [ " + suscripcion.getCodigorpta() + " ] cobrada OK!");
             } else {
                 o.setEstadocobro("Pendiente");
-                suscripcionError++;
-                logger.info("Suscripcion con codigo [ " + suscripcion.getCodigorpta() + " ] NO hasido cobradad!");
+                mountSuscriptionsExecuted.addSuscriptionError();
+                logger.info("Suscripcion con codigo [ " + suscripcion.getCodigorpta() + " ] NO ha sido cobrada. Ejecucion con ERROR!");
             }
 
             o.setIdsuscripcion(suscripcion.getIdSuscripcion());
@@ -71,29 +67,11 @@ public class ProcesoCobroWriter implements ItemWriter<EjecucionCobro>, ItemStrea
         this.procedure = procedure;
     }
 
-    @Override
-    public void open(ExecutionContext executionContext) throws ItemStreamException {
-
+    public MountSuscriptionsExecuted getMountSuscriptionsExecuted() {
+        return mountSuscriptionsExecuted;
     }
 
-    @Override
-    public void update(ExecutionContext executionContext) throws ItemStreamException {
-
-        int ok = executionContext.getInt("suscripcion_ok");
-        int error = executionContext.getInt("suscripcion_error");
-
-        int sumOk = ok + suscripcionOk;
-        int sumError = error + suscripcionError;
-
-        logger.debug("Cuenta cobros OK = " + sumOk);
-        logger.debug("Cuenta cobros ERROR = " + sumError);
-
-        executionContext.putInt("suscripcion_ok", sumOk);
-        executionContext.putInt("suscripcion_error", sumError);
-    }
-
-    @Override
-    public void close() throws ItemStreamException {
-
+    public void setMountSuscriptionsExecuted(MountSuscriptionsExecuted mountSuscriptionsExecuted) {
+        this.mountSuscriptionsExecuted = mountSuscriptionsExecuted;
     }
 }

@@ -74,9 +74,6 @@
             <batch:chunk reader="procesoCobroReader"
                          processor="procesoCobroProcessor"
                          writer="procesoCobroWriter" commit-interval="1">
-                <batch:streams>
-                    <batch:stream ref="procesoCobroWriter"/>
-                </batch:streams>
             </batch:chunk>
             <batch:listeners>
                 <batch:listener ref="procesoCobroStepListener"/>
@@ -133,10 +130,11 @@
           class="pe.com.entel.aplicacion.carrierbilling.jobs.writer.ProcesoCobroWriter"
           scope="step">
         <property name="procedure" ref="actualizaCobroStoreProcedure"/>
+        <property name="mountSuscriptionsExecuted" ref="mountSuscriptionsExecuted"/>
     </bean>
 
     <bean id="gestionCobroService"
-          class="pe.com.entel.aplicacion.carrierbilling.service.GestionCobroService">
+          class="pe.com.entel.aplicacion.carrierbilling.service.GestionCobroService" scope="prototype">
         <property name="cobroWsTemplate" ref="cobroWsTemplate"/>
         <property name="cobroConfirmacionWsTemplate" ref="cobroConfirmacionWsTemplate"/>
         <property name="currency" value="${carbill.app.currency}"/>
@@ -212,6 +210,7 @@
         <property name="suscripcionReintento" value="#{jobExecutionContext[suscripcion_reintento]}"/>
         <property name="tiempoInicial" value="#{jobExecutionContext[tiempo_inicio]}"/>
         <property name="modificadoPor" value="${carbill.app.userId}"/>
+        <property name="mountSuscriptionsExecuted" ref="mountSuscriptionsExecuted"/>
     </bean>
 
     <bean id="actualizaEjecucionStoreProcedure"
@@ -228,5 +227,9 @@
         <constructor-arg index="8" value="${carbill.sp.procedure.actualizaejec.outparam7}"/>
         <constructor-arg index="9" value="${carbill.sp.procedure.actualizaejec.outparam8}"/>
     </bean>
+
+    <bean id="mountSuscriptionsExecuted"
+          class="pe.com.entel.aplicacion.carrierbilling.util.MountSuscriptionsExecuted"
+          scope="singleton"/>
 
 </beans>

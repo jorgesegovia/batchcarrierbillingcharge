@@ -10,6 +10,7 @@ import org.springframework.batch.repeat.RepeatStatus;
 import pe.com.entel.aplicacion.carrierbilling.domain.ActualizaEjecucionSp;
 import pe.com.entel.aplicacion.carrierbilling.domain.InicioCobroSp;
 import pe.com.entel.aplicacion.carrierbilling.repository.ActualizaEjecucionStoreProcedure;
+import pe.com.entel.aplicacion.carrierbilling.util.MountSuscriptionsExecuted;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -37,14 +38,16 @@ public class FinCobroTasklet implements Tasklet {
 
     private String modificadoPor;
 
+    private MountSuscriptionsExecuted mountSuscriptionsExecuted;
+
     @Override
     public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
         ActualizaEjecucionSp in = new ActualizaEjecucionSp();
 
         in.setIdBillControl(idBillControl);
-        in.setSuscripcionOk(suscripcionOk);
-        in.setSuscripcionError(suscripcionError);
-        in.setSuscripcionReintento(suscripcionReintento);
+        in.setSuscripcionOk(mountSuscriptionsExecuted.getSuscriptionOk());
+        in.setSuscripcionError(mountSuscriptionsExecuted.getSuscriptionError());
+        in.setSuscripcionReintento(0);
         in.setModificadoPor(modificadoPor);
 
         logger.debug("Tiempo Inicial: " + tiempoInicial);
@@ -53,7 +56,7 @@ public class FinCobroTasklet implements Tasklet {
         long tiempoTotal = System.currentTimeMillis() - tiempoInicial;
         long tiempoTotalSec = TimeUnit.MILLISECONDS.toSeconds(tiempoTotal);
 
-        logger.info("Tiempo Total Sec : " + tiempoTotalSec);
+        logger.info("Tiempo total de ejecucion del proceso [ " + tiempoTotalSec + " ] sec(s)");
 
         in.setTiempoTotal(tiempoTotalSec);
 
@@ -122,5 +125,13 @@ public class FinCobroTasklet implements Tasklet {
 
     public void setModificadoPor(String modificadoPor) {
         this.modificadoPor = modificadoPor;
+    }
+
+    public MountSuscriptionsExecuted getMountSuscriptionsExecuted() {
+        return mountSuscriptionsExecuted;
+    }
+
+    public void setMountSuscriptionsExecuted(MountSuscriptionsExecuted mountSuscriptionsExecuted) {
+        this.mountSuscriptionsExecuted = mountSuscriptionsExecuted;
     }
 }

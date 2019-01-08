@@ -96,8 +96,8 @@ public class ActualizaCobroStoreProcedure extends StoredProcedure {
                 o.getWsdescripcionrpta(), o.getWsejecucion(), o.getWshttpstatus(),
                 o.getEstadocobro(), o.getServicioejec());
 
-        logger.info("OUT: " + outParamName10 + " -> " + spResult.get(outParamName10));
-        logger.info("OUT: " + outParamName11 + " -> " + spResult.get(outParamName11));
+        logger.debug("OUT: " + outParamName10 + " -> " + spResult.get(outParamName10));
+        logger.debug("OUT: " + outParamName11 + " -> " + spResult.get(outParamName11));
 
         o.setCodigorpta(String.valueOf(spResult.get(outParamName10)));
         o.setMensaje(String.valueOf(spResult.get(outParamName11)));
