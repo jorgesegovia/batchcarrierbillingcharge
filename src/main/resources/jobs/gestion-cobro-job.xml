@@ -197,7 +197,7 @@
 
     <batch:step id="findCobroStepParent">
         <batch:tasklet ref="finCobroTasklet">
-            <batch:listeners>S
+            <batch:listeners>
                 <batch:listener ref="promotionListener"/>
             </batch:listeners>
         </batch:tasklet>
