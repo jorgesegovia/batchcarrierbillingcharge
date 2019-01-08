@@ -26,7 +26,7 @@ public class ActualizaCancelacionStoreProcedure extends StoredProcedure {
                                               String outParamName3) {
         super(jdbcTemplate, fullName);
 
-        logger.debug("fullName: " + fullName);
+        logger.info("fullName: " + fullName);
         logger.debug("inParamName1: " + inParamName1);
         logger.debug("outParamName2: " + outParamName2);
         logger.debug("outParamName3: " + outParamName3);
@@ -50,8 +50,8 @@ public class ActualizaCancelacionStoreProcedure extends StoredProcedure {
 
         Map spResult = this.execute(o.getIdsuscripcion());
 
-        logger.debug("OUT: " + outParamName2 + " -> " + spResult.get(outParamName2));
-        logger.debug("OUT: " + outParamName3 + " -> " + spResult.get(outParamName3));
+        logger.info("OUT: " + outParamName2 + " -> " + spResult.get(outParamName2));
+        logger.info("OUT: " + outParamName3 + " -> " + spResult.get(outParamName3));
 
         o.setCodigorpta(String.valueOf(spResult.get(outParamName2)));
         o.setMensaje(String.valueOf(spResult.get(outParamName3)));

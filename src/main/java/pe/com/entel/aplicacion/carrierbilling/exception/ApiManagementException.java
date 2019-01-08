@@ -12,7 +12,7 @@ public class ApiManagementException extends Exception{
 	private ApiManagementError error;
 
 	public ApiManagementException(ApiManagementError error) {
-		super();
+		super(error.getDescripcionError());
 		this.error = error;
 	}
 	

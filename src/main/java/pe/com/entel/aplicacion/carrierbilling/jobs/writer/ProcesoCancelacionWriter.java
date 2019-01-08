@@ -22,13 +22,12 @@ public class ProcesoCancelacionWriter implements ItemWriter<Suscripcion> {
 	
 	@Override
 	public void write(List<? extends Suscripcion> list) throws Exception {
-		logger.debug("Entro write");
 		for (Suscripcion s : list) {
 			
-			logger.debug("API terminar" + s);
+			logger.info("API terminar" + s);
 			try {
 				service.ejecutar(s.getShareAccountId());
-				logger.debug("ActualizaCobroStoreProcedure: " + procedure);
+				logger.info("ActualizaCobroStoreProcedure: " + procedure);
 				ActualizarCancelacionSp o = new ActualizarCancelacionSp();
 				o.setIdsuscripcion(s.getIdSuscripcion());
 				ActualizarCancelacionSp resp = procedure.run(o);
