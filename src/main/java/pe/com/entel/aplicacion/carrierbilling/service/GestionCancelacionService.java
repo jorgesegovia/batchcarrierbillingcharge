@@ -114,7 +114,7 @@ public class GestionCancelacionService {
 			logger.debug(sb.toString());
 			conn.disconnect();
 		} catch (Exception e) {
-			logger.error("error", e);
+			logger.info("Respuesta no esperada : " + e.getMessage());
 			apiManagementError.setDescripcionError(e.getMessage());
 			throw new ApiManagementException(apiManagementError);
 		}
