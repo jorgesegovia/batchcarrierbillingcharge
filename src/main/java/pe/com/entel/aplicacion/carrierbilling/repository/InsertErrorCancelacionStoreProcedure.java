@@ -36,7 +36,7 @@ public class InsertErrorCancelacionStoreProcedure extends StoredProcedure {
                                               String outParamName2) {
         super(jdbcTemplate, fullName);
 
-        logger.info("fullName: " + fullName);
+        logger.debug("fullName: " + fullName);
         logger.debug("inParamName1: " + inParamName1);
         logger.debug("inParamName2: " + inParamName2);
         logger.debug("inParamName3: " + inParamName3);
@@ -72,8 +72,8 @@ public class InsertErrorCancelacionStoreProcedure extends StoredProcedure {
 
         Map spResult = this.execute(o.getServicio(), o.getCodigoError(), o.getDescripcionError(), o.getCodigoHttp());
 
-        logger.info("OUT: " + outParamName1 + " -> " + spResult.get(outParamName1));
-        logger.info("OUT: " + outParamName2 + " -> " + spResult.get(outParamName2));
+        logger.debug("OUT: " + outParamName1 + " -> " + spResult.get(outParamName1));
+        logger.debug("OUT: " + outParamName2 + " -> " + spResult.get(outParamName2));
 
         o.setCodigoError(String.valueOf(spResult.get(outParamName1)));
         o.setDescripcionError(String.valueOf(spResult.get(outParamName2)));
