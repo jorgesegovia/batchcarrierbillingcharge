@@ -47,7 +47,7 @@ public class InsertErrorCancelacionStoreProcedure extends StoredProcedure {
         this.fullName = fullName;
         this.inParamName1 = inParamName1;
         this.inParamName2 = inParamName2;
-        this.inParamName3 = inParamName3;
+        this.inParamName3 = inParamName3;	
         this.inParamName4 = inParamName4;
         this.outParamName1 = outParamName1;
         this.outParamName2 = outParamName2;

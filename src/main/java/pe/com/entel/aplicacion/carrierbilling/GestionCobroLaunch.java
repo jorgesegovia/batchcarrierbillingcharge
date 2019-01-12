@@ -81,7 +81,7 @@ public class GestionCobroLaunch {
 
             logger.info("------ Inicio Job de Terminacion ------");
 
-            String secondJobName = "gestionCancelacionJob";
+            String secondJobName = "gestionTerminacionJob";
 
             JobParameters secondJobParameters = new JobParametersBuilder()
                     .addString("dateProcesoStr", dateProcess)
@@ -95,6 +95,24 @@ public class GestionCobroLaunch {
             validatingJob(secondJobName);
 
             logger.info("------- Fin Job de Terminacion -------");
+            
+            logger.info("------ Inicio Job de Cancelacion ------");
+
+            String thirdJobName = "gestionCancelacionJob";
+
+            JobParameters thirdJobParameters = new JobParametersBuilder()
+                    .addString("dateProcesoStr", dateProcess)
+                    .toJobParameters();
+
+            String thirdParams = thirdJobParameters.toString();
+            secondParams = StringUtils.substring(thirdParams, 1, thirdParams.length() - 1);
+
+            jobOperator.start(thirdJobName, thirdParams);
+
+            validatingJob(thirdJobName);
+
+            logger.info("------- Fin Job de Cancelacion -------");
+            
 
         } catch (Exception e) {
             logger.error(e);

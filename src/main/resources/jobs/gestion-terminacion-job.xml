@@ -9,30 +9,30 @@
     <context:component-scan base-package="pe.com.entel.aplicacion.carrierbilling"/>
     <context:annotation-config/>
 
-    <batch:job id="gestionCancelacionJob" restartable="true" job-repository="jobRepository">
-        <batch:step id="procesoCancelacionStep" parent="procesoCancelacionStepParent">
+    <batch:job id="gestionTerminacionJob" restartable="true" job-repository="jobRepository">
+        <batch:step id="procesoTerminacionStep" parent="procesoTerminacionStepParent">
             <batch:end on="COMPLETED"/>
         </batch:step>
     </batch:job>
 
     <!-- Step 1-->
-    <batch:step id="procesoCancelacionStepParent">
+    <batch:step id="procesoTerminacionStepParent">
         <batch:tasklet transaction-manager="transactionManager">
-            <batch:chunk reader="procesoCancelacionReader"
-                         writer="procesoCancelacionWriter" commit-interval="1">
+            <batch:chunk reader="procesoTerminacionReader"
+                         writer="procesoTerminacionWriter" commit-interval="1">
             </batch:chunk>
         </batch:tasklet>
     </batch:step>
 
-    <bean id="procesoCancelacionReader"
+    <bean id="procesoTerminacionReader"
           class="org.springframework.batch.item.database.StoredProcedureItemReader"
           scope="step">
         <property name="dataSource" ref="carrierBillingDs"/>
-        <property name="procedureName" value="CARBILL.PKG_SC_GESTION_COBRO.SP_SC_AC_CONS_CANCEL_PEND"/>
+        <property name="procedureName" value="CARBILL.PKG_SC_GESTION_COBRO.SP_SC_AC_CONS_TERM_PEND"/>
         <property name="parameters">
             <list>
                 <bean class="org.springframework.jdbc.core.SqlOutParameter">
-                    <constructor-arg index="0" value="ac_cancelaciones_lst"/>
+                    <constructor-arg index="0" value="ac_terminaciones_lst"/>
                     <constructor-arg index="1">
                         <util:constant static-field="oracle.jdbc.OracleTypes.CURSOR"/>
                     </constructor-arg>
@@ -52,25 +52,25 @@
             </list>
         </property>
         <property name="refCursorPosition" value="1"/>
-        <property name="rowMapper" ref="procesoCancelacionRowMapper"/>
-        <property name="preparedStatementSetter" ref="procesoCancelacionPreparedStatementSetter"/>
+        <property name="rowMapper" ref="procesoTerminacionRowMapper"/>
+        <property name="preparedStatementSetter" ref="procesoTerminacionPreparedStatementSetter"/>
     </bean>
 
-    <bean id="procesoCancelacionWriter"
-          class="pe.com.entel.aplicacion.carrierbilling.jobs.writer.ProcesoCancelacionWriter"
+    <bean id="procesoTerminacionWriter"
+          class="pe.com.entel.aplicacion.carrierbilling.jobs.writer.ProcesoTerminacionWriter"
           scope="step">
         <property name="procedure" ref="actualizaCancelacionStoreProcedure"/>
         <property name="procedureError" ref="insertErrorCancelacionStoreProcedure"/>
-        <property name="service" ref="gestionCancelacionService"/>
+        <property name="service" ref="gestionTerminacionService"/>
     </bean>
 
-    <bean id="procesoCancelacionPreparedStatementSetter"
-          class="pe.com.entel.aplicacion.carrierbilling.mapper.ProcesoCancelacionPreparedStatementSetter"
+    <bean id="procesoTerminacionPreparedStatementSetter"
+          class="pe.com.entel.aplicacion.carrierbilling.mapper.ProcesoTerminacionPreparedStatementSetter"
           scope="step">
     </bean>
 
-    <bean id="procesoCancelacionRowMapper"
-          class="pe.com.entel.aplicacion.carrierbilling.mapper.ProcesoCancelacionRowMapper"
+    <bean id="procesoTerminacionRowMapper"
+          class="pe.com.entel.aplicacion.carrierbilling.mapper.ProcesoTerminacionRowMapper"
           scope="step"/>
     <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
         <property name="dataSource" ref="carrierBillingDs"/>
@@ -98,17 +98,17 @@
         <constructor-arg index="7" value="${carbill.sp.procedure.insertErrorCancelacion.outparam6}" />
     </bean>
     
-    <bean id="gestionCancelacionService"
-          class="pe.com.entel.aplicacion.carrierbilling.service.GestionCancelacionService"
+    <bean id="gestionTerminacionService"
+          class="pe.com.entel.aplicacion.carrierbilling.service.GestionTerminacionService"
           scope="singleton" lazy-init="true">
         <constructor-arg index="0" value="${carbill.rest.token.url}"/>
         <constructor-arg index="1" value="${carbill.rest.token.metodo}"/>
-        <constructor-arg index="2" value="${carbill.rest.cancelar.url}" />
-        <constructor-arg index="3" value="${carbill.rest.cancelar.metodo}" />
+        <constructor-arg index="2" value="${carbill.rest.terminar.url}" />
+        <constructor-arg index="3" value="${carbill.rest.terminar.metodo}" />
         <constructor-arg index="4" value="${carbill.rest.token.header.1}" />
-        <constructor-arg index="5" value="${carbill.rest.cancelar.header.1}" />
-        <constructor-arg index="6" value="${carbill.rest.cancelar.header.2}" />
-        <constructor-arg index="7" value="${carbill.rest.cancelar.header.3}" />
+        <constructor-arg index="5" value="${carbill.rest.terminar.header.1}" />
+        <constructor-arg index="6" value="${carbill.rest.terminar.header.2}" />
+        <constructor-arg index="7" value="${carbill.rest.terminar.header.3}" />
     </bean>    
 
 </beans>
