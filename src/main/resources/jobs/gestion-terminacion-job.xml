@@ -109,6 +109,7 @@
         <constructor-arg index="5" value="${carbill.rest.terminar.header.1}" />
         <constructor-arg index="6" value="${carbill.rest.terminar.header.2}" />
         <constructor-arg index="7" value="${carbill.rest.terminar.header.3}" />
+        <constructor-arg index="8" value="${carbill.rest.terminar.codigos.error}" />
     </bean>    
 
 </beans>

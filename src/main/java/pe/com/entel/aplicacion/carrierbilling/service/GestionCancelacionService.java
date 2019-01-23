@@ -18,6 +18,7 @@ import pe.com.entel.aplicacion.carrierbilling.domain.HeaderRequest;
 import pe.com.entel.aplicacion.carrierbilling.domain.Token;
 import pe.com.entel.aplicacion.carrierbilling.domain.TokenError;
 import pe.com.entel.aplicacion.carrierbilling.exception.ApiManagementException;
+import pe.com.entel.aplicacion.carrierbilling.exception.ApiManagementInactiveException;
 
 public class GestionCancelacionService {
 
@@ -31,9 +32,10 @@ public class GestionCancelacionService {
 	private String cancelarHeader1;
 	private String cancelarHeader2;
 	private String cancelarHeader3;
+	private String codigosError;
 
 	public GestionCancelacionService(String tokenUrl, String tokenMetodo, String cancelarUrl, String cancelarMetodo,
-			String tokenHeader1, String cancelarHeader1, String cancelarHeader2, String cancelarHeader3) {
+			String tokenHeader1, String cancelarHeader1, String cancelarHeader2, String cancelarHeader3, String codigosError) {
 
 		logger.debug("tokenUrl: " + tokenUrl);
 		logger.debug("tokenMetodo: " + tokenMetodo);
@@ -43,7 +45,8 @@ public class GestionCancelacionService {
 		logger.debug("cancelarHeader1: " + cancelarHeader1);
 		logger.debug("cancelarHeader2: " + cancelarHeader2);
 		logger.debug("cancelarHeader3: " + cancelarHeader3);
-
+		logger.debug("codigosError: " + codigosError);
+		
 		this.tokenUrl = tokenUrl;
 		this.tokenMetodo = tokenMetodo;
 		this.cancelarUrl = cancelarUrl;
@@ -52,10 +55,11 @@ public class GestionCancelacionService {
 		this.cancelarHeader1 = cancelarHeader1;
 		this.cancelarHeader2 = cancelarHeader2;
 		this.cancelarHeader3 = cancelarHeader3;
+		this.codigosError = codigosError;
 
 	}
 
-	public String ejecutar(String shareAccountId) throws ApiManagementException {
+	public String ejecutar(String shareAccountId) throws ApiManagementException, ApiManagementInactiveException {
 
 		logger.info("Inicio rest Token");
 		ArrayList<HeaderRequest> listaHeadersToken = obtenerHeadersToken();
@@ -74,7 +78,7 @@ public class GestionCancelacionService {
 	}
 
 	private String invocarRest(String cadenaUrl, String metodo, ArrayList<HeaderRequest> listaCabecera)
-			throws ApiManagementException {
+			throws ApiManagementException, ApiManagementInactiveException {
 		String output = "";
 		StringBuilder sb = new StringBuilder();
 		ApiManagementError apiManagementError = new ApiManagementError();
@@ -102,6 +106,14 @@ public class GestionCancelacionService {
 				apiManagementError.setCodigoHttp(conn.getResponseCode());
 				apiManagementError.setCodigoError(tokenError.getResult().getCode());
 				apiManagementError.setDescripcionError(tokenError.getResult().getDescription());
+				
+				String[] listaCodigosError = this.codigosError.split(",");
+				for (String codigoError: listaCodigosError) {           
+				    if(tokenError.getResult().getCode().equals(codigoError)) {
+				    	throw new ApiManagementInactiveException(apiManagementError);
+				    }
+				}
+				
 				throw new ApiManagementException(apiManagementError);
 			}
 
