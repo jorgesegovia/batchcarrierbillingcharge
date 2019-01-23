@@ -1,8 +1,10 @@
 package pe.com.entel.aplicacion.carrierbilling.service;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
@@ -13,12 +15,16 @@ import org.apache.log4j.Logger;
 
 import com.google.gson.Gson;
 
+import pe.com.entel.aplicacion.carrierbilling.domain.ActualizarCancelacionSp;
 import pe.com.entel.aplicacion.carrierbilling.domain.ApiManagementError;
 import pe.com.entel.aplicacion.carrierbilling.domain.HeaderRequest;
+import pe.com.entel.aplicacion.carrierbilling.domain.Suscripcion;
 import pe.com.entel.aplicacion.carrierbilling.domain.Token;
 import pe.com.entel.aplicacion.carrierbilling.domain.TokenError;
 import pe.com.entel.aplicacion.carrierbilling.exception.ApiManagementException;
 import pe.com.entel.aplicacion.carrierbilling.exception.ApiManagementInactiveException;
+import pe.com.entel.aplicacion.carrierbilling.repository.ActualizaCancelacionStoreProcedure;
+import pe.com.entel.aplicacion.carrierbilling.repository.InsertErrorCancelacionStoreProcedure;
 
 public class GestionCancelacionService {
 
@@ -33,7 +39,9 @@ public class GestionCancelacionService {
 	private String cancelarHeader2;
 	private String cancelarHeader3;
 	private String codigosError;
-
+	private ActualizaCancelacionStoreProcedure procedure;
+	private InsertErrorCancelacionStoreProcedure procedureError;
+	
 	public GestionCancelacionService(String tokenUrl, String tokenMetodo, String cancelarUrl, String cancelarMetodo,
 			String tokenHeader1, String cancelarHeader1, String cancelarHeader2, String cancelarHeader3, String codigosError) {
 
@@ -59,26 +67,35 @@ public class GestionCancelacionService {
 
 	}
 
-	public String ejecutar(String shareAccountId) throws ApiManagementException, ApiManagementInactiveException {
-
-		logger.info("Inicio rest Token");
-		ArrayList<HeaderRequest> listaHeadersToken = obtenerHeadersToken();
-		String tokenJson = this.invocarRest(tokenUrl, tokenMetodo, listaHeadersToken);
-		logger.debug("tokenJson : " + tokenJson);
-		Gson gson = new Gson();
-		Token token = gson.fromJson(tokenJson, Token.class);
-		logger.debug("getAcces_token : " + token.getAccess_token());
-		logger.info("Fin rest Token");
-		logger.info("Inicio Rest Cancelar");
-		String urlTerminar = MessageFormat.format(cancelarUrl, shareAccountId);
-		ArrayList<HeaderRequest> listaHeadersCancel = obtenerHeadersTerminate(token.getAccess_token());
-		String terminarJson = this.invocarRest(urlTerminar, cancelarMetodo, listaHeadersCancel);
-		logger.info("FIN Rest Cancelar");
+	public String ejecutar(Suscripcion s) throws Exception {
+		String terminarJson = "";
+		try {
+			logger.info("Inicio rest Token");
+			ArrayList<HeaderRequest> listaHeadersToken = obtenerHeadersToken();
+			String tokenJson = this.invocarRest(tokenUrl, tokenMetodo, listaHeadersToken);
+			logger.debug("tokenJson : " + tokenJson);
+			Gson gson = new Gson();
+			Token token = gson.fromJson(tokenJson, Token.class);
+			logger.debug("getAcces_token : " + token.getAccess_token());
+			logger.info("Fin rest Token");
+			logger.info("Inicio Rest Cancelar");
+			String urlTerminar = MessageFormat.format(cancelarUrl, s.getShareAccountId());
+			ArrayList<HeaderRequest> listaHeadersCancel = obtenerHeadersTerminate(token.getAccess_token());
+			terminarJson = this.invocarRest(urlTerminar, cancelarMetodo, listaHeadersCancel);
+			logger.info("FIN Rest Cancelar");
+			actualizarCancelacion(s);
+		} catch (ApiManagementException e) {
+			procedureError.run(e.getError());
+		} catch (ApiManagementInactiveException e) {
+			procedureError.run(e.getError());
+			actualizarCancelacion(s);
+		}
 		return terminarJson;
 	}
 
 	private String invocarRest(String cadenaUrl, String metodo, ArrayList<HeaderRequest> listaCabecera)
 			throws ApiManagementException, ApiManagementInactiveException {
+		logger.debug("cadenaUrl : " + cadenaUrl);
 		String output = "";
 		StringBuilder sb = new StringBuilder();
 		ApiManagementError apiManagementError = new ApiManagementError();
@@ -88,7 +105,7 @@ public class GestionCancelacionService {
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod(metodo);
 			conn.setRequestProperty("Accept", "application/json");
-			logger.debug("cadenaUrl : " + cadenaUrl);
+			
 			if (listaCabecera != null && !listaCabecera.isEmpty()) {
 				for (HeaderRequest header : listaCabecera) {
 					conn.setRequestProperty(header.getNombre(), header.getValor());
@@ -97,7 +114,6 @@ public class GestionCancelacionService {
 			logger.debug("conn.getResponseCode() : " + conn.getResponseCode());
 			if (conn.getResponseCode() != 200) {
 				BufferedReader brerror = new BufferedReader(new InputStreamReader((conn.getErrorStream())));
-				
 				while ((output = brerror.readLine()) != null) {
 					sb.append(output);
 				}
@@ -108,12 +124,11 @@ public class GestionCancelacionService {
 				apiManagementError.setDescripcionError(tokenError.getResult().getDescription());
 				
 				String[] listaCodigosError = this.codigosError.split(",");
-				for (String codigoError: listaCodigosError) {           
+				for (String codigoError: listaCodigosError) {  
 				    if(tokenError.getResult().getCode().equals(codigoError)) {
 				    	throw new ApiManagementInactiveException(apiManagementError);
 				    }
 				}
-				
 				throw new ApiManagementException(apiManagementError);
 			}
 
@@ -125,7 +140,11 @@ public class GestionCancelacionService {
 			}
 			logger.debug(sb.toString());
 			conn.disconnect();
-		} catch (Exception e) {
+		} catch (MalformedURLException e) {
+			logger.info("Respuesta no esperada : " + e.getMessage());
+			apiManagementError.setDescripcionError(e.getMessage());
+			throw new ApiManagementException(apiManagementError);
+		} catch (IOException e) {
 			logger.info("Respuesta no esperada : " + e.getMessage());
 			apiManagementError.setDescripcionError(e.getMessage());
 			throw new ApiManagementException(apiManagementError);
@@ -177,5 +196,33 @@ public class GestionCancelacionService {
 		header5.setValor("Bearer " + accesToken);
 		listaHeaders.add(header5);
 		return listaHeaders;
+	}
+	
+	private void actualizarCancelacion(Suscripcion s) throws Exception {
+		logger.info("ActualizaCobroStoreProcedure: " + procedure);
+		ActualizarCancelacionSp o = new ActualizarCancelacionSp();
+		o.setIdsuscripcion(s.getIdSuscripcion());
+		ActualizarCancelacionSp resp = procedure.run(o);
+
+		if (!"0000".equals(resp.getCodigorpta())) {
+			logger.debug("Suscripcion: " + s);
+			throw new Exception("Error en el procedure");
+		}
+	}
+	
+	public ActualizaCancelacionStoreProcedure getProcedure() {
+		return procedure;
+	}
+
+	public void setProcedure(ActualizaCancelacionStoreProcedure procedure) {
+		this.procedure = procedure;
+	}
+	
+	public InsertErrorCancelacionStoreProcedure getProcedureError() {
+		return procedureError;
+	}
+
+	public void setProcedureError(InsertErrorCancelacionStoreProcedure procedureError) {
+		this.procedureError = procedureError;
 	}
 }

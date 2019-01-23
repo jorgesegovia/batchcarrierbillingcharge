@@ -59,8 +59,6 @@
     <bean id="procesoTerminacionWriter"
           class="pe.com.entel.aplicacion.carrierbilling.jobs.writer.ProcesoTerminacionWriter"
           scope="step">
-        <property name="procedure" ref="actualizaCancelacionStoreProcedure"/>
-        <property name="procedureError" ref="insertErrorCancelacionStoreProcedure"/>
         <property name="service" ref="gestionTerminacionService"/>
     </bean>
 
@@ -110,6 +108,8 @@
         <constructor-arg index="6" value="${carbill.rest.terminar.header.2}" />
         <constructor-arg index="7" value="${carbill.rest.terminar.header.3}" />
         <constructor-arg index="8" value="${carbill.rest.terminar.codigos.error}" />
+        <property name="procedure" ref="actualizaCancelacionStoreProcedure"/>
+        <property name="procedureError" ref="insertErrorCancelacionStoreProcedure"/>
     </bean>    
 
 </beans>
