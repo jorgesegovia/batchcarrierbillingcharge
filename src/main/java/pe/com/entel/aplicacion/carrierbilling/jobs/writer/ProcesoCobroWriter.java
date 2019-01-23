@@ -40,7 +40,7 @@ public class ProcesoCobroWriter implements ItemWriter<EjecucionCobro> {
             } else {
                 o.setEstadocobro("Pendiente");
                 mountSuscriptionsExecuted.addSuscriptionError();
-                logger.info("Suscripcion con codigo [ " + suscripcion.getCodigorpta() + " ] NO ha sido cobrada. Ejecucion con ERROR!");
+                logger.info("Suscripcion con codigo [ " + suscripcion.getCodigorpta() + " ] NO ha sido cobrada. Ejecucion con FALLO!");
             }
 
             o.setIdsuscripcion(suscripcion.getIdSuscripcion());

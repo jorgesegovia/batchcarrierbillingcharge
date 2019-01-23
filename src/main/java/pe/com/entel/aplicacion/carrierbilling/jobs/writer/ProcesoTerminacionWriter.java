@@ -8,26 +8,33 @@ import org.springframework.batch.item.ItemWriter;
 import pe.com.entel.aplicacion.carrierbilling.domain.Suscripcion;
 import pe.com.entel.aplicacion.carrierbilling.service.GestionTerminacionService;
 
+/**
+ * @version 1.0, 23/01/2019
+ * @autor wsotomayor
+ */
 public class ProcesoTerminacionWriter implements ItemWriter<Suscripcion> {
 
-	static Logger logger = Logger.getLogger(ProcesoCancelacionWriter.class);
+    static Logger logger = Logger.getLogger(ProcesoCancelacionWriter.class);
 
-	private GestionTerminacionService service;
+    private GestionTerminacionService service;
 
-	@Override
-	public void write(List<? extends Suscripcion> list) throws Exception {
-		for (Suscripcion s : list) {
-			logger.info("API terminar" + s);
-			service.ejecutar(s);
-		}
-	}
+    @Override
+    public void write(List<? extends Suscripcion> list) throws Exception {
 
-	public GestionTerminacionService getService() {
-		return service;
-	}
+        logger.debug("Total de registros: " + list.size());
 
-	public void setService(GestionTerminacionService service) {
-		this.service = service;
-	}
+        for (Suscripcion s : list) {
+            logger.debug("Suscripcion: " + s);
+            service.ejecutar(s);
+        }
+    }
+
+    public GestionTerminacionService getService() {
+        return service;
+    }
+
+    public void setService(GestionTerminacionService service) {
+        this.service = service;
+    }
 
 }
