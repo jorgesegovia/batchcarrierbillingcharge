@@ -85,10 +85,10 @@ public class GestionCancelacionService {
             actualizarCancelacion(s);
             logger.info("Cancelacion de suscripcion [ " + s.getIdSuscripcion() + " ] ejecutada correctamente!");
         } catch (ApiManagementException e) {
-            procedureError.run(e.getError());
+            procedureError.run(e.getError(), s.getIdSuscripcion());
             logger.info("Cancelacion de suscripcion [ " + s.getIdSuscripcion() + " ] con FALLO: " + e.getError());
         } catch (ApiManagementInactiveException e) {
-            procedureError.run(e.getError());
+            procedureError.run(e.getError(), s.getIdSuscripcion());
             actualizarCancelacion(s);
             logger.info("Cancelacion de suscripcion [ " + s.getIdSuscripcion() + " ] con FALLO: " + e.getError());
         }

@@ -21,6 +21,8 @@ public class InsertErrorCancelacionStoreProcedure extends StoredProcedure {
     private String inParamName3;
     
     private String inParamName4;
+    
+    private String inParamName5;
 
     private String outParamName1;
     
@@ -32,6 +34,7 @@ public class InsertErrorCancelacionStoreProcedure extends StoredProcedure {
                                               String inParamName2,
                                               String inParamName3,
                                               String inParamName4,
+                                              String inParamName5,
                                               String outParamName1,
                                               String outParamName2) {
         super(jdbcTemplate, fullName);
@@ -41,6 +44,7 @@ public class InsertErrorCancelacionStoreProcedure extends StoredProcedure {
         logger.debug("inParamName2: " + inParamName2);
         logger.debug("inParamName3: " + inParamName3);
         logger.debug("inParamName4: " + inParamName4);
+        logger.debug("inParamName5: " + inParamName5);
         logger.debug("outParamName1: " + outParamName1);
         logger.debug("outParamName2: " + outParamName2);
 
@@ -49,6 +53,7 @@ public class InsertErrorCancelacionStoreProcedure extends StoredProcedure {
         this.inParamName2 = inParamName2;
         this.inParamName3 = inParamName3;	
         this.inParamName4 = inParamName4;
+        this.inParamName5 = inParamName5;
         this.outParamName1 = outParamName1;
         this.outParamName2 = outParamName2;
 
@@ -56,21 +61,23 @@ public class InsertErrorCancelacionStoreProcedure extends StoredProcedure {
         SqlParameter paramIn2 = new SqlParameter(inParamName2, OracleTypes.VARCHAR);
         SqlParameter paramIn3 = new SqlParameter(inParamName3, OracleTypes.VARCHAR);
         SqlParameter paramIn4 = new SqlParameter(inParamName4, OracleTypes.NUMBER);
-        SqlOutParameter paramOut5 = new SqlOutParameter(outParamName1, OracleTypes.VARCHAR);
-        SqlOutParameter paramOut6 = new SqlOutParameter(outParamName2, OracleTypes.VARCHAR);
-        SqlParameter[] paramArray = {paramIn1, paramIn2, paramIn3, paramIn4, paramOut5, paramOut6};
+        SqlParameter paramIn5 = new SqlParameter(inParamName5, OracleTypes.NUMBER);
+        SqlOutParameter paramOut1 = new SqlOutParameter(outParamName1, OracleTypes.VARCHAR);
+        SqlOutParameter paramOut2 = new SqlOutParameter(outParamName2, OracleTypes.VARCHAR);
+        SqlParameter[] paramArray = {paramIn1, paramIn2, paramIn3, paramIn4, paramIn5, paramOut1, paramOut2};
         setFunction(false);
         setParameters(paramArray);
     }
 
-    public ApiManagementError run (ApiManagementError o) throws Exception {
+    public ApiManagementError run (ApiManagementError o, int idSuscripcion) throws Exception {
 
         logger.debug("IN: " + inParamName1 + "-> " + o.getServicio());
         logger.debug("IN: " + inParamName2 + "-> " + o.getCodigoError());
         logger.debug("IN: " + inParamName3 + "-> " + o.getDescripcionError());
         logger.debug("IN: " + inParamName4 + "-> " + o.getCodigoHttp());
+        logger.debug("IN: " + inParamName5 + "-> " + idSuscripcion);
 
-        Map spResult = this.execute(o.getServicio(), o.getCodigoError(), o.getDescripcionError(), o.getCodigoHttp());
+        Map spResult = this.execute(o.getServicio(), o.getCodigoError(), o.getDescripcionError(), o.getCodigoHttp(), idSuscripcion);
 
         logger.debug("OUT: " + outParamName1 + " -> " + spResult.get(outParamName1));
         logger.debug("OUT: " + outParamName2 + " -> " + spResult.get(outParamName2));
