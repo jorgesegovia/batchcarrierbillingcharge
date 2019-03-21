@@ -26,5 +26,6 @@ public class RegCobroPendienteConstants {
     public static final String CUR_VCHREQUESTID = "VCHREQUESTID";
     public static final String CUR_VCHBANGOTRANSACTIONID = "VCHBANGOTRANSACTIONID";
     public static final String CUR_NUMCANAL = "NUMCANAL";
+    public static final String CUR_VCHTIPOEJECUCION = "VCHTIPOEJECUCION";
 
 }

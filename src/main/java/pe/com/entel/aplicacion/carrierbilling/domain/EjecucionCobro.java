@@ -21,7 +21,7 @@ public class EjecucionCobro {
     private String estadocobro;
 
     private String servicioejec;
-
+    
     public Suscripcion getSuscripcion() {
         return suscripcion;
     }

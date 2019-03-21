@@ -15,31 +15,43 @@ public class ActualizaCancelacionStoreProcedure extends StoredProcedure {
 
     private String inParamName1;
 
-    private String outParamName2;
+    private String inParamName2;
+    
+    private String inParamName3;
 
-    private String outParamName3;
+    private String outParamName1;
+
+    private String outParamName2;
 
     public ActualizaCancelacionStoreProcedure(JdbcTemplate jdbcTemplate,
                                               String fullName,
                                               String inParamName1,
-                                              String outParamName2,
-                                              String outParamName3) {
+                                              String inParamName2,
+                                              String inParamName3,
+                                              String outParamName1,
+                                              String outParamName2) {
         super(jdbcTemplate, fullName);
 
         logger.info("fullName: " + fullName);
         logger.debug("inParamName1: " + inParamName1);
+        logger.debug("inParamName2: " + inParamName2);
+        logger.debug("inParamName3: " + inParamName3);
+        logger.debug("outParamName1: " + outParamName1);
         logger.debug("outParamName2: " + outParamName2);
-        logger.debug("outParamName3: " + outParamName3);
 
         this.fullName = fullName;
         this.inParamName1 = inParamName1;
+        this.inParamName2 = inParamName2;
+        this.inParamName3 = inParamName3;
+        this.outParamName1 = outParamName1;
         this.outParamName2 = outParamName2;
-        this.outParamName3 = outParamName3;
 
         SqlParameter paramIn1 = new SqlParameter(inParamName1, OracleTypes.NUMBER);
+        SqlParameter paramIn2 = new SqlParameter(inParamName2, OracleTypes.VARCHAR);
+        SqlParameter paramIn3 = new SqlParameter(inParamName3, OracleTypes.VARCHAR);
+        SqlOutParameter paramOut1 = new SqlOutParameter(outParamName1, OracleTypes.VARCHAR);
         SqlOutParameter paramOut2 = new SqlOutParameter(outParamName2, OracleTypes.VARCHAR);
-        SqlOutParameter paramOut3 = new SqlOutParameter(outParamName3, OracleTypes.VARCHAR);
-        SqlParameter[] paramArray = {paramIn1, paramOut2, paramOut3};
+        SqlParameter[] paramArray = {paramIn1, paramIn2, paramIn3, paramOut1, paramOut2};
         setFunction(false);
         setParameters(paramArray);
     }
@@ -47,14 +59,16 @@ public class ActualizaCancelacionStoreProcedure extends StoredProcedure {
     public ActualizarCancelacionSp run (ActualizarCancelacionSp o) throws Exception {
 
         logger.debug("IN: " + inParamName1 + " -> " + o.getIdsuscripcion());
+        logger.debug("IN: " + inParamName2+ " -> " + o.getEstado());
+        logger.debug("IN: " + inParamName3 + " -> " + o.getModificadoPor());
 
-        Map spResult = this.execute(o.getIdsuscripcion());
+        Map spResult = this.execute(o.getIdsuscripcion(), o.getEstado(), o.getModificadoPor());
 
+        logger.info("OUT: " + outParamName1 + " -> " + spResult.get(outParamName1));
         logger.info("OUT: " + outParamName2 + " -> " + spResult.get(outParamName2));
-        logger.info("OUT: " + outParamName3 + " -> " + spResult.get(outParamName3));
 
-        o.setCodigorpta(String.valueOf(spResult.get(outParamName2)));
-        o.setMensaje(String.valueOf(spResult.get(outParamName3)));
+        o.setCodigorpta(String.valueOf(spResult.get(outParamName1)));
+        o.setMensaje(String.valueOf(spResult.get(outParamName2)));
 
         return o;
     }

@@ -3,6 +3,8 @@ package pe.com.entel.aplicacion.carrierbilling.domain;
 public class ActualizarCancelacionSp {
 
     private int idsuscripcion;
+    private String estado;
+    private String modificadoPor;
     private String codigorpta;
     private String mensaje;
 
@@ -29,4 +31,21 @@ public class ActualizarCancelacionSp {
     public void setMensaje(String mensaje) {
         this.mensaje = mensaje;
     }
+
+	public String getEstado() {
+		return estado;
+	}
+
+	public void setEstado(String estado) {
+		this.estado = estado;
+	}
+
+	public String getModificadoPor() {
+		return modificadoPor;
+	}
+
+	public void setModificadoPor(String modificadoPor) {
+		this.modificadoPor = modificadoPor;
+	}
+    
 }

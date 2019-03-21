@@ -7,6 +7,7 @@ import org.springframework.batch.item.ItemWriter;
 
 import pe.com.entel.aplicacion.carrierbilling.domain.Suscripcion;
 import pe.com.entel.aplicacion.carrierbilling.service.GestionTerminacionService;
+import pe.com.entel.aplicacion.carrierbilling.service.ActualizarSuscripcionService;
 
 /**
  * @version 1.0, 23/01/2019
@@ -14,27 +15,41 @@ import pe.com.entel.aplicacion.carrierbilling.service.GestionTerminacionService;
  */
 public class ProcesoTerminacionWriter implements ItemWriter<Suscripcion> {
 
-    static Logger logger = Logger.getLogger(ProcesoCancelacionWriter.class);
+	static Logger logger = Logger.getLogger(ProcesoCancelacionWriter.class);
+	private static final String CANAL_SPOTIFY = "Spotify";
+	private GestionTerminacionService service;
+	private ActualizarSuscripcionService actualizarSuscripcionService;
 
-    private GestionTerminacionService service;
+	@Override
+	public void write(List<? extends Suscripcion> list) throws Exception {
 
-    @Override
-    public void write(List<? extends Suscripcion> list) throws Exception {
+		logger.debug("Total de registros: " + list.size());
 
-        logger.debug("Total de registros: " + list.size());
+		for (Suscripcion s : list) {
+			logger.debug("Suscripcion: " + s);
 
-        for (Suscripcion s : list) {
-            logger.debug("Suscripcion: " + s);
-            service.ejecutar(s);
-        }
-    }
+			if (CANAL_SPOTIFY.equals(s.getCanal())) {
+				service.ejecutar(s);
+			} else {
+				actualizarSuscripcionService.ejecutar(s);
+			}
+		}
+	}
 
-    public GestionTerminacionService getService() {
-        return service;
-    }
+	public GestionTerminacionService getService() {
+		return service;
+	}
 
-    public void setService(GestionTerminacionService service) {
-        this.service = service;
-    }
+	public void setService(GestionTerminacionService service) {
+		this.service = service;
+	}
+
+	public ActualizarSuscripcionService getActualizarSuscripcionService() {
+		return actualizarSuscripcionService;
+	}
+
+	public void setActualizarSuscripcionService(ActualizarSuscripcionService actualizarSuscripcionService) {
+		this.actualizarSuscripcionService = actualizarSuscripcionService;
+	}
 
 }

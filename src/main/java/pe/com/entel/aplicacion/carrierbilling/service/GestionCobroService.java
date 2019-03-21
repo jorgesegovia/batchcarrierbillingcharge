@@ -1,13 +1,18 @@
 package pe.com.entel.aplicacion.carrierbilling.service;
 
-import com.oracle.xmlns.carrierbilling.bpel_gestioncobro.EjecutarCobroRequestType;
-import com.oracle.xmlns.carrierbilling.bpel_gestioncobro.EjecutarCobroResponseType;
-import com.oracle.xmlns.carrierbilling.bpel_gestioncobro.EntelFaultMessage;
-import com.oracle.xmlns.carrierbilling.bpel_gestioncobroconfirmacion.EjecutarCobroConfirmacionRequestType;
-import com.oracle.xmlns.carrierbilling.bpel_gestioncobroconfirmacion.EjecutarCobroConfirmacionResponseType;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import javax.xml.bind.JAXBElement;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.ws.handler.soap.SOAPMessageContext;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.ws.WebServiceMessage;
 import org.springframework.ws.client.WebServiceClientException;
 import org.springframework.ws.client.core.WebServiceMessageCallback;
@@ -20,21 +25,19 @@ import org.springframework.ws.soap.SoapHeader;
 import org.springframework.ws.soap.SoapMessage;
 import org.springframework.ws.soap.client.SoapFaultClientException;
 import org.springframework.xml.transform.StringSource;
+
+import com.oracle.xmlns.carrierbilling.bpel_gestioncobro.EjecutarCobroRequestType;
+import com.oracle.xmlns.carrierbilling.bpel_gestioncobro.EjecutarCobroResponseType;
+import com.oracle.xmlns.carrierbilling.bpel_gestioncobroconfirmacion.EjecutarCobroConfirmacionRequestType;
+import com.oracle.xmlns.carrierbilling.bpel_gestioncobroconfirmacion.EjecutarCobroConfirmacionResponseType;
+
+import pe.com.entel.aplicacion.carrierbilling.domain.EjecucionActualizacion;
 import pe.com.entel.aplicacion.carrierbilling.domain.EjecucionCobro;
 import pe.com.entel.aplicacion.carrierbilling.domain.Suscripcion;
+import pe.com.entel.aplicacion.carrierbilling.repository.InsertErrorCancelacionStoreProcedure;
 import pe.com.entel.soa.data.generico.entelfault.v1.EntelFault;
 import pe.com.entel.soa.data.servicio.carrierbilling.v1.CarrierBillingCobroConfirmacionType;
 import pe.com.entel.soa.data.servicio.carrierbilling.v1.CarrierBillingCobroType;
-
-import javax.xml.bind.JAXBElement;
-import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.ws.handler.soap.SOAPMessageContext;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 /**
  * @author jsegovia
@@ -45,9 +48,13 @@ public class GestionCobroService {
     public static final String TRANSACCION_DATE_FORMAT = "yyyyMMdd_HHmm";
 
     public static final String FECHAINICIO_DATE_FORMAT = "yyyy-MM-dd HH:mm";
-
+    
     static Logger logger = Logger.getLogger(GestionCobroService.class);
 
+    private static final String TIPO_CANCELACION = "CANCELACION";
+    
+    private static final String TIPO_DEGRADACION = "DEGRADACION";
+    
     private WebServiceTemplate cobroWsTemplate;
 
     private WebServiceTemplate cobroConfirmacionWsTemplate;
@@ -61,18 +68,30 @@ public class GestionCobroService {
     private SoapClientInterceptor interceptor = new SoapClientInterceptor();
 
     private EjecucionCobro ejecucionCobro = new EjecucionCobro();
+    
+    private ActualizarSuscripcionService actualizarSuscripcionService;
+    
+    private InsertErrorCancelacionStoreProcedure procedureError;
 
     public EjecucionCobro ejecutarCobro(Suscripcion s) throws Exception {
 
         logger.info("Ejecutando cobro para suscripcion [ " + s.getIdSuscripcion() + " ] ...");
 
-        ejecutarCobroWs(s);
+        if (TIPO_CANCELACION.equals(StringUtils.upperCase(s.getTipoEjecucion()))) {
+        	ejecutarActualizarSuscripcion(s);
+        }else {
+            ejecutarCobroWs(s);
 
-        if ("0000".equals(s.getCodigorpta())) {
-            ejecutarCobroConfirmacionWs(s);
+            if ("0000".equals(s.getCodigorpta())) {
+                ejecutarCobroConfirmacionWs(s);
+            }
+
+            logger.debug("Suscripcion: " + s);
+            
+            if("0000".equals(s.getCodigorpta()) && TIPO_DEGRADACION.equals(StringUtils.upperCase(s.getTipoEjecucion()))) {
+            	ejecutarActualizarSuscripcion(s);
+            }
         }
-
-        logger.debug("Suscripcion: " + s);
 
         return ejecucionCobro;
     }
@@ -154,6 +173,7 @@ public class GestionCobroService {
             }
         }
 
+        codigoRespuestWs = "0000"; //eliminar
         s.setCodigorpta(codigoRespuestWs);
         s.setDescripcionrpta(descripcionRespuestaWs);
 
@@ -255,6 +275,7 @@ public class GestionCobroService {
         logger.info("CONFIRMACIOM Codigo -> [ " + codigoRespuestWs + " ]");
         logger.info("CONFIRMACION Mensaje -> [ " + StringUtils.left(descripcionRespuestaWs, 150) + " ]");
 
+        codigoRespuestWs = "0000";//eliminar
         s.setCodigorpta(codigoRespuestWs);
         s.setDescripcionrpta(descripcionRespuestaWs);
 
@@ -272,6 +293,31 @@ public class GestionCobroService {
         ejecucionCobro.setWsejecucion(new Date());
     }
 
+    public void ejecutarActualizarSuscripcion(Suscripcion s) throws Exception {
+    	logger.debug("Inicio ejecutarActualizarSuscripcion");
+    	EjecucionActualizacion ejecucionActualizacion = actualizarSuscripcionService.ejecutar(s);
+    	
+        s.setCodigorpta(ejecucionActualizacion.getCodrpta());
+        s.setDescripcionrpta(ejecucionActualizacion.getDescripcionrpta());
+
+        ejecucionCobro.setSuscripcion(s);
+        ejecucionCobro.setWscodrpta(ejecucionActualizacion.getCodrpta());
+        ejecucionCobro.setWsdescripcionrpta(ejecucionActualizacion.getDescripcionrpta());
+        
+        logger.info("ACTUALIZAR SUSCRIPCION Codigo -> [ " + ejecucionActualizacion.getCodrpta() + " ]");
+        logger.info("ACTUALIZAR SUSCRIPCION Mensaje -> [ " + StringUtils.left(ejecucionActualizacion.getDescripcionrpta(), 150) + " ]");
+        
+        if(TIPO_CANCELACION.equals(StringUtils.upperCase(s.getTipoEjecucion()))) {
+        	ejecucionCobro.setServicioejec(TIPO_CANCELACION);
+        	logger.debug("Tipo Cancelacion");
+        }else {
+        	ejecucionCobro.setServicioejec("confirmacion");
+        	logger.debug("Tipo Degradacion");
+        }
+        ejecucionCobro.setWsejecucion(new Date());
+        logger.debug("Fin ejecutarActualizarSuscripcion");
+    }
+    
     public WebServiceTemplate getCobroWsTemplate() {
         return cobroWsTemplate;
     }
@@ -418,5 +464,23 @@ public class GestionCobroService {
             this.httpMessage = httpMessage;
         }
     }
+
+	public ActualizarSuscripcionService getActualizarSuscripcionService() {
+		return actualizarSuscripcionService;
+	}
+
+	public void setActualizarSuscripcionService(ActualizarSuscripcionService actualizarSuscripcionService) {
+		this.actualizarSuscripcionService = actualizarSuscripcionService;
+	}
+
+	public InsertErrorCancelacionStoreProcedure getProcedureError() {
+		return procedureError;
+	}
+
+	public void setProcedureError(InsertErrorCancelacionStoreProcedure procedureError) {
+		this.procedureError = procedureError;
+	}
+    
+    
 
 }

@@ -112,7 +112,6 @@ public class GestionCobroLaunch {
 
             logger.info("------- Fin Job de Terminacion -------");
 
-
         } catch (Exception e) {
             logger.error(e);
         }

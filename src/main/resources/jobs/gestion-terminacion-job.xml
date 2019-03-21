@@ -60,6 +60,7 @@
           class="pe.com.entel.aplicacion.carrierbilling.jobs.writer.ProcesoTerminacionWriter"
           scope="step">
         <property name="service" ref="gestionTerminacionService"/>
+        <property name="actualizarSuscripcionService" ref="actualizarSuscripcionService"/>
     </bean>
 
     <bean id="procesoTerminacionPreparedStatementSetter"
@@ -79,8 +80,10 @@
         <constructor-arg index="0" ref="jdbcTemplate"/>
         <constructor-arg index="1" value="${carbill.sp.procedure.actualizacancelacion.fullname}"/>
         <constructor-arg index="2" value="${carbill.sp.procedure.actualizacancelacion.inparam1}" />
-        <constructor-arg index="3" value="${carbill.sp.procedure.actualizacancelacion.outparam2}" />
-        <constructor-arg index="4" value="${carbill.sp.procedure.actualizacancelacion.outparam3}" />
+        <constructor-arg index="3" value="${carbill.sp.procedure.actualizacancelacion.inparam2}" />
+        <constructor-arg index="4" value="${carbill.sp.procedure.actualizacancelacion.inparam3}" />
+        <constructor-arg index="5" value="${carbill.sp.procedure.actualizacancelacion.outparam2}" />
+        <constructor-arg index="6" value="${carbill.sp.procedure.actualizacancelacion.outparam3}" />
     </bean>
 
     <bean id="insertErrorCancelacionStoreProcedure"
@@ -109,8 +112,25 @@
         <constructor-arg index="6" value="${carbill.rest.terminar.header.2}" />
         <constructor-arg index="7" value="${carbill.rest.terminar.header.3}" />
         <constructor-arg index="8" value="${carbill.rest.terminar.codigos.error}" />
+        <constructor-arg index="9" value="${carbill.rest.terminar.estado}" />
+        <constructor-arg index="10" value="${carbill.app.creadorPor}" />
         <property name="procedure" ref="actualizaCancelacionStoreProcedure"/>
         <property name="procedureError" ref="insertErrorCancelacionStoreProcedure"/>
-    </bean>    
+    </bean>  
 
+    <bean id="actualizarSuscripcionService"
+          class="pe.com.entel.aplicacion.carrierbilling.service.ActualizarSuscripcionService"
+          scope="singleton" lazy-init="true">
+        <constructor-arg index="0" value="${carbill.rest.token.url}"/>
+        <constructor-arg index="1" value="${carbill.rest.token.metodo}"/>
+        <constructor-arg index="2" value="${carbill.rest.limpiarcache.url}" />
+        <constructor-arg index="3" value="${carbill.rest.limpiarcache.metodo}" />
+        <constructor-arg index="4" value="${carbill.rest.token.header.1}" />
+        <constructor-arg index="5" value="${carbill.rest.limpiarcache.header.1}" />
+        <constructor-arg index="6" value="${carbill.rest.limpiarcache.header.2}" />
+        <constructor-arg index="7" value="${carbill.rest.limpiarcache.header.3}" />
+        <constructor-arg index="8" value="${carbill.app.creadorPor}" />
+        <property name="procedureError" ref="insertErrorCancelacionStoreProcedure"/>
+    </bean>  
+    
 </beans>

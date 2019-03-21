@@ -28,6 +28,7 @@ public class Suscripcion {
     private String requestId;
     private String bangoTransactionId;
     private int idCanal;
+    private String tipoEjecucion;
 
     public String getShareAccountId() {
         return shareAccountId;
@@ -205,7 +206,15 @@ public class Suscripcion {
         this.idCanal = idCanal;
     }
 
-    @Override
+    public String getTipoEjecucion() {
+		return tipoEjecucion;
+	}
+
+	public void setTipoEjecucion(String tipoEjecucion) {
+		this.tipoEjecucion = tipoEjecucion;
+	}
+
+	@Override
     public String toString() {
         return "Suscripcion{" +
                 "rowNum=" + rowNum +
@@ -230,6 +239,7 @@ public class Suscripcion {
                 ", requestId='" + requestId + '\'' +
                 ", bangoTransactionId='" + bangoTransactionId + '\'' +
                 ", idCanal=" + idCanal +
+                ", tipoEjecucion=" + tipoEjecucion +
                 '}';
     }
 }

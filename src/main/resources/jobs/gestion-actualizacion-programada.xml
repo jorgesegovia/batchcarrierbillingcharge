@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.2.xsd">
+
+    <context:component-scan base-package="pe.com.entel.aplicacion.carrierbilling"/>
+    <context:annotation-config/>
+
+    <batch:job id="gestionActualizacionProgJob" restartable="true" job-repository="jobRepository">
+        <batch:step id="procesoActualizacionProgStep" parent="procesoActualizacionProgStepParent">
+            <batch:end on="COMPLETED"/>
+        </batch:step>
+    </batch:job>
+
+    <!-- Step 1-->
+    <batch:step id="procesoActualizacionProgStepParent">
+        <batch:tasklet transaction-manager="transactionManager">
+            <batch:chunk reader="procesoActualizacionProgReader"
+                         writer="procesoActualizacionProgWriter" commit-interval="1">
+            </batch:chunk>
+        </batch:tasklet>
+    </batch:step>
+
+    <bean id="procesoActualizacionProgReader"
+          class="org.springframework.batch.item.database.StoredProcedureItemReader"
+          scope="step">
+        <property name="dataSource" ref="carrierBillingDs"/>
+        <property name="procedureName" value="CARBILL.PKG_SC_GESTION_COBRO.SP_SC_AC_CONS_ACT_PEND"/>
+        <property name="parameters">
+            <list>
+                <bean class="org.springframework.jdbc.core.SqlOutParameter">
+                    <constructor-arg index="0" value="ac_suscripciones_lst"/>
+                    <constructor-arg index="1">
+                        <util:constant static-field="oracle.jdbc.OracleTypes.CURSOR"/>
+                    </constructor-arg>
+                </bean>
+                <bean class="org.springframework.jdbc.core.SqlOutParameter">
+                    <constructor-arg index="0" value="AVCH_CODIGORPTA"/>
+                    <constructor-arg index="1">
+                        <util:constant static-field="oracle.jdbc.OracleTypes.VARCHAR"/>
+                    </constructor-arg>
+                </bean>
+                <bean class="org.springframework.jdbc.core.SqlOutParameter">
+                    <constructor-arg index="0" value="AVCH_MENSAJE"/>
+                    <constructor-arg index="1">
+                        <util:constant static-field="oracle.jdbc.OracleTypes.VARCHAR"/>
+                    </constructor-arg>
+                </bean>
+            </list>
+        </property>
+        <property name="refCursorPosition" value="1"/>
+        <property name="rowMapper" ref="procesoActualizacionProgRowMapper"/>
+        <property name="preparedStatementSetter" ref="procesoActualizacionProgPreparedStatementSetter"/>
+    </bean>
+
+    <bean id="procesoActualizacionProgWriter"
+          class="pe.com.entel.aplicacion.carrierbilling.jobs.writer.ProcesoActualizacionProgWriter"
+          scope="step">
+        <property name="service" ref="gestionActualizacionProgService"/>
+        <property name="actualizarSuscripcionService" ref="actualizarSuscripcionService"/>
+    </bean>
+
+    <bean id="procesoActualizacionProgPreparedStatementSetter"
+          class="pe.com.entel.aplicacion.carrierbilling.mapper.ProcesoActualizacionProgPreparedStatementSetter"
+          scope="step">
+    </bean>
+
+    <bean id="procesoActualizacionProgRowMapper"
+          class="pe.com.entel.aplicacion.carrierbilling.mapper.ProcesoActualizacionProgRowMapper"
+          scope="step"/>
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="carrierBillingDs"/>
+    </bean>
+    <bean id="actualizaCancelacionStoreProcedure"
+          class="pe.com.entel.aplicacion.carrierbilling.repository.ActualizaCancelacionStoreProcedure"
+          scope="singleton" lazy-init="true">
+        <constructor-arg index="0" ref="jdbcTemplate"/>
+        <constructor-arg index="1" value="${carbill.sp.procedure.actualizacancelacion.fullname}"/>
+        <constructor-arg index="2" value="${carbill.sp.procedure.actualizacancelacion.inparam1}" />
+        <constructor-arg index="3" value="${carbill.sp.procedure.actualizacancelacion.inparam2}" />
+        <constructor-arg index="4" value="${carbill.sp.procedure.actualizacancelacion.inparam3}" />
+        <constructor-arg index="5" value="${carbill.sp.procedure.actualizacancelacion.outparam2}" />
+        <constructor-arg index="6" value="${carbill.sp.procedure.actualizacancelacion.outparam3}" />
+    </bean>
+
+    <bean id="insertErrorCancelacionStoreProcedure"
+          class="pe.com.entel.aplicacion.carrierbilling.repository.InsertErrorCancelacionStoreProcedure"
+          scope="singleton" lazy-init="true">
+        <constructor-arg index="0" ref="jdbcTemplate"/>
+        <constructor-arg index="1" value="${carbill.sp.procedure.insertErrorCancelacion.fullname}"/>
+        <constructor-arg index="2" value="${carbill.sp.procedure.insertErrorCancelacion.inparam1}" />
+        <constructor-arg index="3" value="${carbill.sp.procedure.insertErrorCancelacion.inparam2}" />
+        <constructor-arg index="4" value="${carbill.sp.procedure.insertErrorCancelacion.inparam3}" />
+        <constructor-arg index="5" value="${carbill.sp.procedure.insertErrorCancelacion.inparam4}" />
+        <constructor-arg index="6" value="${carbill.sp.procedure.insertErrorCancelacion.inparam5}" />
+        <constructor-arg index="7" value="${carbill.sp.procedure.insertErrorCancelacion.outparam6}" />
+        <constructor-arg index="8" value="${carbill.sp.procedure.insertErrorCancelacion.outparam7}" />
+    </bean>
+    
+    <bean id="gestionTerminacionService"
+          class="pe.com.entel.aplicacion.carrierbilling.service.GestionTerminacionService"
+          scope="singleton" lazy-init="true">
+        <constructor-arg index="0" value="${carbill.rest.token.url}"/>
+        <constructor-arg index="1" value="${carbill.rest.token.metodo}"/>
+        <constructor-arg index="2" value="${carbill.rest.terminar.url}" />
+        <constructor-arg index="3" value="${carbill.rest.terminar.metodo}" />
+        <constructor-arg index="4" value="${carbill.rest.token.header.1}" />
+        <constructor-arg index="5" value="${carbill.rest.terminar.header.1}" />
+        <constructor-arg index="6" value="${carbill.rest.terminar.header.2}" />
+        <constructor-arg index="7" value="${carbill.rest.terminar.header.3}" />
+        <constructor-arg index="8" value="${carbill.rest.terminar.codigos.error}" />
+        <constructor-arg index="9" value="${carbill.rest.terminar.estado}" />
+        <constructor-arg index="10" value="${carbill.app.creadorPor}" />
+        <property name="procedure" ref="actualizaCancelacionStoreProcedure"/>
+        <property name="procedureError" ref="insertErrorCancelacionStoreProcedure"/>
+    </bean>  
+
+    <bean id="actualizarSuscripcionService"
+          class="pe.com.entel.aplicacion.carrierbilling.service.ActualizarSuscripcionService"
+          scope="singleton" lazy-init="true">
+        <constructor-arg index="0" value="${carbill.rest.token.url}"/>
+        <constructor-arg index="1" value="${carbill.rest.token.metodo}"/>
+        <constructor-arg index="2" value="${carbill.rest.limpiarcache.url}" />
+        <constructor-arg index="3" value="${carbill.rest.limpiarcache.metodo}" />
+        <constructor-arg index="4" value="${carbill.rest.token.header.1}" />
+        <constructor-arg index="5" value="${carbill.rest.limpiarcache.header.1}" />
+        <constructor-arg index="6" value="${carbill.rest.limpiarcache.header.2}" />
+        <constructor-arg index="7" value="${carbill.rest.limpiarcache.header.3}" />
+        <constructor-arg index="8" value="${carbill.app.creadorPor}" />
+        <property name="procedureError" ref="insertErrorCancelacionStoreProcedure"/>
+    </bean>  
+    
+</beans>

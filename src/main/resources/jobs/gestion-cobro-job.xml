@@ -140,6 +140,8 @@
         <property name="currency" value="${carbill.app.currency}"/>
         <property name="idAplicacion" value="${carbill.app.idAplicacion}"/>
         <property name="userId" value="${carbill.app.userId}"/>
+        <property name="actualizarSuscripcionService" ref="actualizarSuscripcionService"/>
+        <property name="procedureError" ref="insertErrorCancelacionStoreProcedure"/>
     </bean>
 
     <bean id="procesoCobroPreparedStatementSetter"
@@ -232,4 +234,32 @@
           class="pe.com.entel.aplicacion.carrierbilling.util.MountSuscriptionsExecuted"
           scope="singleton"/>
 
+    <bean id="actualizarSuscripcionService"
+          class="pe.com.entel.aplicacion.carrierbilling.service.ActualizarSuscripcionService"
+          scope="singleton" lazy-init="true">
+        <constructor-arg index="0" value="${carbill.rest.token.url}"/>
+        <constructor-arg index="1" value="${carbill.rest.token.metodo}"/>
+        <constructor-arg index="2" value="${carbill.rest.limpiarcache.url}" />
+        <constructor-arg index="3" value="${carbill.rest.limpiarcache.metodo}" />
+        <constructor-arg index="4" value="${carbill.rest.token.header.1}" />
+        <constructor-arg index="5" value="${carbill.rest.limpiarcache.header.1}" />
+        <constructor-arg index="6" value="${carbill.rest.limpiarcache.header.2}" />
+        <constructor-arg index="7" value="${carbill.rest.limpiarcache.header.3}" />
+        <constructor-arg index="8" value="${carbill.app.creadorPor}" />
+        <property name="procedureError" ref="insertErrorCancelacionStoreProcedure"/>
+    </bean>  
+    
+    <bean id="insertErrorCancelacionStoreProcedure"
+          class="pe.com.entel.aplicacion.carrierbilling.repository.InsertErrorCancelacionStoreProcedure"
+          scope="singleton" lazy-init="true">
+        <constructor-arg index="0" ref="jdbcTemplate"/>
+        <constructor-arg index="1" value="${carbill.sp.procedure.insertErrorCancelacion.fullname}"/>
+        <constructor-arg index="2" value="${carbill.sp.procedure.insertErrorCancelacion.inparam1}" />
+        <constructor-arg index="3" value="${carbill.sp.procedure.insertErrorCancelacion.inparam2}" />
+        <constructor-arg index="4" value="${carbill.sp.procedure.insertErrorCancelacion.inparam3}" />
+        <constructor-arg index="5" value="${carbill.sp.procedure.insertErrorCancelacion.inparam4}" />
+        <constructor-arg index="6" value="${carbill.sp.procedure.insertErrorCancelacion.inparam5}" />
+        <constructor-arg index="7" value="${carbill.sp.procedure.insertErrorCancelacion.outparam6}" />
+        <constructor-arg index="8" value="${carbill.sp.procedure.insertErrorCancelacion.outparam7}" />
+    </bean> 
 </beans>

@@ -79,8 +79,10 @@
         <constructor-arg index="0" ref="jdbcTemplate"/>
         <constructor-arg index="1" value="${carbill.sp.procedure.actualizacancelacion.fullname}"/>
         <constructor-arg index="2" value="${carbill.sp.procedure.actualizacancelacion.inparam1}" />
-        <constructor-arg index="3" value="${carbill.sp.procedure.actualizacancelacion.outparam2}" />
-        <constructor-arg index="4" value="${carbill.sp.procedure.actualizacancelacion.outparam3}" />
+        <constructor-arg index="3" value="${carbill.sp.procedure.actualizacancelacion.inparam2}" />
+        <constructor-arg index="4" value="${carbill.sp.procedure.actualizacancelacion.inparam3}" />
+        <constructor-arg index="5" value="${carbill.sp.procedure.actualizacancelacion.outparam2}" />
+        <constructor-arg index="6" value="${carbill.sp.procedure.actualizacancelacion.outparam3}" />
     </bean>
 
     <bean id="insertErrorCancelacionStoreProcedure"
@@ -109,6 +111,8 @@
         <constructor-arg index="6" value="${carbill.rest.cancelar.header.2}" />
         <constructor-arg index="7" value="${carbill.rest.cancelar.header.3}" />
         <constructor-arg index="8" value="${carbill.rest.cancelar.codigos.error}" />
+        <constructor-arg index="9" value="${carbill.rest.cancelar.estado}" />
+        <constructor-arg index="10" value="${carbill.app.creadorPor}" />
         <property name="procedure" ref="actualizaCancelacionStoreProcedure"/>
         <property name="procedureError" ref="insertErrorCancelacionStoreProcedure"/>
     </bean>    

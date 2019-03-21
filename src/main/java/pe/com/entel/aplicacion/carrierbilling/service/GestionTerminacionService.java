@@ -39,12 +39,14 @@ public class GestionTerminacionService {
 	private String terminarHeader2;
 	private String terminarHeader3;
 	private String codigosError;
+	private String estado;
+	private String modificadoPor;
 	private ActualizaCancelacionStoreProcedure procedure;
 	private InsertErrorCancelacionStoreProcedure procedureError;
 
 	public GestionTerminacionService(String tokenUrl, String tokenMetodo, String terminarUrl, String terminarMetodo,
 			String tokenHeader1, String terminarHeader1, String terminarHeader2, String terminarHeader3,
-			String codigosError) {
+			String codigosError, String estado, String modificadoPor) {
 
 		logger.debug("tokenUrl: " + tokenUrl);
 		logger.debug("tokenMetodo: " + tokenMetodo);
@@ -55,6 +57,8 @@ public class GestionTerminacionService {
 		logger.debug("terminarHeader2: " + terminarHeader2);
 		logger.debug("terminarHeader3: " + terminarHeader3);
 		logger.debug("codigosError: " + codigosError);
+		logger.debug("estado: " + estado);
+		logger.debug("modificadoPor: " + modificadoPor);
 
 		this.tokenUrl = tokenUrl;
 		this.tokenMetodo = tokenMetodo;
@@ -65,7 +69,9 @@ public class GestionTerminacionService {
 		this.terminarHeader2 = terminarHeader2;
 		this.terminarHeader3 = terminarHeader3;
 		this.codigosError = codigosError;
-
+		this.estado = estado;
+		this.modificadoPor = modificadoPor;
+		
 	}
 
 	public String ejecutar(Suscripcion s) throws Exception {
@@ -209,6 +215,8 @@ public class GestionTerminacionService {
 		logger.debug("ActualizaCobroStoreProcedure: " + procedure);
 		ActualizarCancelacionSp o = new ActualizarCancelacionSp();
 		o.setIdsuscripcion(s.getIdSuscripcion());
+		o.setEstado(this.estado);
+		o.setModificadoPor(this.modificadoPor);
 		ActualizarCancelacionSp resp = procedure.run(o);
 
 		if (!"0000".equals(resp.getCodigorpta())) {

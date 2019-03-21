@@ -28,6 +28,10 @@ public class ProcesoTerminacionRowMapper implements RowMapper<Suscripcion>{
             s.setShareAccountId(rs.getString("VCHIDCUENTACOMPARTIDA"));
         }
 
+        if (rs.getString("vchnombre") != null) {
+            s.setCanal(rs.getString("vchnombre"));
+        }
+        
         return s;
     }
 }

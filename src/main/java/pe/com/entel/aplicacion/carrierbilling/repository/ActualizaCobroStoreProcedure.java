@@ -51,7 +51,7 @@ public class ActualizaCobroStoreProcedure extends StoredProcedure {
         logger.debug("inParamName8: " + inParamName8);
         logger.debug("inParamName9: " + inParamName9);
         logger.debug("outParamName10: " + outParamName10);
-        logger.debug("outParamName12: " + outParamName11);
+        logger.debug("outParamName11: " + outParamName11);
 
         this.fullName = fullName;
         this.inParamName1 = inParamName1;
@@ -76,7 +76,7 @@ public class ActualizaCobroStoreProcedure extends StoredProcedure {
         SqlOutParameter paramOut10 = new SqlOutParameter(outParamName10, OracleTypes.VARCHAR);
         SqlOutParameter paramOut11 = new SqlOutParameter(outParamName11, OracleTypes.VARCHAR);
         SqlParameter[] paramArray = {paramIn1, paramIn2, paramIn4, paramIn5,
-                paramIn6, paramIn7, paramIn8, paramIn9, paramOut10, paramOut11};
+                paramIn6, paramIn7, paramIn8, paramIn9,  paramOut10, paramOut11};
         setFunction(false);
         setParameters(paramArray);
     }

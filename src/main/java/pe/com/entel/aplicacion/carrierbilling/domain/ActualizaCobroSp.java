@@ -23,6 +23,8 @@ public class ActualizaCobroSp {
     private String estadocobro;
 
     private String servicioejec;
+    
+    private String tipoEjecucion;
 
     private String codigorpta;
 
@@ -107,4 +109,13 @@ public class ActualizaCobroSp {
     public void setMensaje(String mensaje) {
         this.mensaje = mensaje;
     }
+
+	public String getTipoEjecucion() {
+		return tipoEjecucion;
+	}
+
+	public void setTipoEjecucion(String tipoEjecucion) {
+		this.tipoEjecucion = tipoEjecucion;
+	}
+    
 }
