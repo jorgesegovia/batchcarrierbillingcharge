@@ -112,6 +112,23 @@ public class GestionCobroLaunch {
 
             logger.info("------- Fin Job de Terminacion -------");
 
+            logger.info("------ Inicio Job de Actualizacion Programada ------");
+
+            String fourthJobName = "gestionActualizacionProgJob";
+
+            JobParameters fourthJobParameters = new JobParametersBuilder()
+                    .addString("dateProcesoStr", dateProcess)
+                    .toJobParameters();
+
+            String fourthParams = fourthJobParameters.toString();
+            fourthParams = StringUtils.substring(fourthParams, 1, fourthParams.length() - 1);
+
+            jobOperator.start(fourthJobName, fourthParams);
+
+            validatingJob(fourthJobName);
+
+            logger.info("------- Fin Job de Actualizacion Programada -------");
+
         } catch (Exception e) {
             logger.error(e);
         }
