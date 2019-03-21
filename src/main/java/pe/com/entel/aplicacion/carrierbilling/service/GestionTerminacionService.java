@@ -30,6 +30,7 @@ public class GestionTerminacionService {
 
 	static Logger logger = Logger.getLogger(GestionCancelacionService.class);
 
+	private static final String CANAL_SPOTIFY = "Spotify";
 	private String tokenUrl;
 	private String tokenMetodo;
 	private String terminarUrl;
@@ -43,6 +44,7 @@ public class GestionTerminacionService {
 	private String modificadoPor;
 	private ActualizaCancelacionStoreProcedure procedure;
 	private InsertErrorCancelacionStoreProcedure procedureError;
+	private LimpiarCacheService limpiarCacheService;
 
 	public GestionTerminacionService(String tokenUrl, String tokenMetodo, String terminarUrl, String terminarMetodo,
 			String tokenHeader1, String terminarHeader1, String terminarHeader2, String terminarHeader3,
@@ -74,8 +76,16 @@ public class GestionTerminacionService {
 		
 	}
 
-	public String ejecutar(Suscripcion s) throws Exception {
-		String terminarJson = "";
+	public void ejecutar(Suscripcion s) throws Exception {
+		if (CANAL_SPOTIFY.equals(s.getCanal())) {
+			this.ejecutarTerminacion(s);
+		} else {
+			limpiarCacheService.ejecutar(s);
+		}
+
+	}
+	
+	private void ejecutarTerminacion(Suscripcion s) throws Exception {
 		try {
 			logger.info("Terminando suscripcion [ " + s.getIdSuscripcion() + " ] ....");
 			ArrayList<HeaderRequest> listaHeadersToken = obtenerHeadersToken();
@@ -86,7 +96,7 @@ public class GestionTerminacionService {
 			logger.info("Token concedido [ " + token.getAccess_token() + " ] ");
 			String urlTerminar = MessageFormat.format(terminarUrl, s.getShareAccountId());
 			ArrayList<HeaderRequest> listaHeadersTerminate = obtenerHeadersTerminate(token.getAccess_token());
-			terminarJson = this.invocarRest(urlTerminar, terminarMetodo, listaHeadersTerminate);
+			this.invocarRest(urlTerminar, terminarMetodo, listaHeadersTerminate);
 			logger.info("Actualizando suscripcion ...");
 			actualizarCancelacion(s);
 			logger.info("Terminacion de suscripcion [ " + s.getIdSuscripcion() + " ] ejecutada correctamente!");
@@ -98,8 +108,6 @@ public class GestionTerminacionService {
 			actualizarCancelacion(s);
             logger.info("Terminacion de suscripcion [ " + s.getIdSuscripcion() + " ] con FALLO: " + e.getError());
 		}
-
-		return terminarJson;
 	}
 
 	private String invocarRest(String cadenaUrl, String metodo, ArrayList<HeaderRequest> listaCabecera)
@@ -240,4 +248,13 @@ public class GestionTerminacionService {
 	public void setProcedureError(InsertErrorCancelacionStoreProcedure procedureError) {
 		this.procedureError = procedureError;
 	}
+
+	public LimpiarCacheService getLimpiarCacheService() {
+		return limpiarCacheService;
+	}
+
+	public void setLimpiarCacheService(LimpiarCacheService limpiarCacheService) {
+		this.limpiarCacheService = limpiarCacheService;
+	}
+	
 }

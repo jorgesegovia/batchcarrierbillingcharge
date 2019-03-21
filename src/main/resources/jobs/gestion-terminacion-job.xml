@@ -60,7 +60,6 @@
           class="pe.com.entel.aplicacion.carrierbilling.jobs.writer.ProcesoTerminacionWriter"
           scope="step">
         <property name="service" ref="gestionTerminacionService"/>
-        <property name="actualizarSuscripcionService" ref="actualizarSuscripcionService"/>
     </bean>
 
     <bean id="procesoTerminacionPreparedStatementSetter"
@@ -116,10 +115,11 @@
         <constructor-arg index="10" value="${carbill.app.creadorPor}" />
         <property name="procedure" ref="actualizaCancelacionStoreProcedure"/>
         <property name="procedureError" ref="insertErrorCancelacionStoreProcedure"/>
+        <property name="limpiarCacheService" ref="limpiarCacheService"/>
     </bean>  
 
-    <bean id="actualizarSuscripcionService"
-          class="pe.com.entel.aplicacion.carrierbilling.service.ActualizarSuscripcionService"
+    <bean id="limpiarCacheService"
+          class="pe.com.entel.aplicacion.carrierbilling.service.LimpiarCacheService"
           scope="singleton" lazy-init="true">
         <constructor-arg index="0" value="${carbill.rest.token.url}"/>
         <constructor-arg index="1" value="${carbill.rest.token.metodo}"/>

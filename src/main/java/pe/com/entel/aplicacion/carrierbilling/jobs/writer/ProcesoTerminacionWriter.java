@@ -7,7 +7,6 @@ import org.springframework.batch.item.ItemWriter;
 
 import pe.com.entel.aplicacion.carrierbilling.domain.Suscripcion;
 import pe.com.entel.aplicacion.carrierbilling.service.GestionTerminacionService;
-import pe.com.entel.aplicacion.carrierbilling.service.ActualizarSuscripcionService;
 
 /**
  * @version 1.0, 23/01/2019
@@ -16,9 +15,8 @@ import pe.com.entel.aplicacion.carrierbilling.service.ActualizarSuscripcionServi
 public class ProcesoTerminacionWriter implements ItemWriter<Suscripcion> {
 
 	static Logger logger = Logger.getLogger(ProcesoCancelacionWriter.class);
-	private static final String CANAL_SPOTIFY = "Spotify";
 	private GestionTerminacionService service;
-	private ActualizarSuscripcionService actualizarSuscripcionService;
+
 
 	@Override
 	public void write(List<? extends Suscripcion> list) throws Exception {
@@ -28,11 +26,7 @@ public class ProcesoTerminacionWriter implements ItemWriter<Suscripcion> {
 		for (Suscripcion s : list) {
 			logger.debug("Suscripcion: " + s);
 
-			if (CANAL_SPOTIFY.equals(s.getCanal())) {
-				service.ejecutar(s);
-			} else {
-				actualizarSuscripcionService.ejecutar(s);
-			}
+			service.ejecutar(s);
 		}
 	}
 
@@ -42,14 +36,6 @@ public class ProcesoTerminacionWriter implements ItemWriter<Suscripcion> {
 
 	public void setService(GestionTerminacionService service) {
 		this.service = service;
-	}
-
-	public ActualizarSuscripcionService getActualizarSuscripcionService() {
-		return actualizarSuscripcionService;
-	}
-
-	public void setActualizarSuscripcionService(ActualizarSuscripcionService actualizarSuscripcionService) {
-		this.actualizarSuscripcionService = actualizarSuscripcionService;
 	}
 
 }
