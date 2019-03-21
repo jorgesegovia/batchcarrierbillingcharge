@@ -36,11 +36,11 @@ public class ProcesoCobroWriter implements ItemWriter<EjecucionCobro> {
             if ("0000".equals(suscripcion.getCodigorpta())) {
                 o.setEstadocobro("Cobrado");
                 mountSuscriptionsExecuted.addSuscriptionOk();
-                logger.info("Suscripcion con codigo [ " + suscripcion.getCodigorpta() + " ] cobrada OK!");
+                logger.info("Suscripcion con codigo [ " + suscripcion.getIdSuscripcion() + " ] cobrada OK!");
             } else {
                 o.setEstadocobro("Pendiente");
                 mountSuscriptionsExecuted.addSuscriptionError();
-                logger.info("Suscripcion con codigo [ " + suscripcion.getCodigorpta() + " ] NO ha sido cobrada. Ejecucion con FALLO!");
+                logger.info("Suscripcion con codigo [ " + suscripcion.getIdSuscripcion() + " ] NO ha sido cobrada. Ejecucion con FALLO!");
             }
 
             o.setIdsuscripcion(suscripcion.getIdSuscripcion());
