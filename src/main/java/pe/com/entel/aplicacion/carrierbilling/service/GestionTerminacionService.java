@@ -198,7 +198,6 @@ public class GestionTerminacionService {
 		header2.setValor(listaHeader2[1]);
 		listaHeaders.add(header2);
 
-		
 		HeaderRequest header3 = new HeaderRequest();
 		String[] listaHeader3 = this.terminarHeader3.split(",");
 		header3.setNombre(listaHeader3[0]);
