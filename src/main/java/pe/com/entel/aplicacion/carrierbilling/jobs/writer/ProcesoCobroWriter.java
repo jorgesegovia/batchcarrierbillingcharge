@@ -50,7 +50,6 @@ public class ProcesoCobroWriter implements ItemWriter<EjecucionCobro> {
             o.setWsejecucion(e.getWsejecucion());
             o.setWshttpstatus(e.getWshttpstatus());
             o.setServicioejec(e.getServicioejec());
-            o.setTipoEjecucion(suscripcion.getTipoEjecucion());
             
             ActualizaCobroSp resp = procedure.run(o);
 

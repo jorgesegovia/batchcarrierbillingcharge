@@ -86,11 +86,6 @@ public class ProcesoCobroRowMapper implements RowMapper<Suscripcion> {
             s.setIdCanal(rs.getInt(CUR_NUMCANAL));
         }
 
-        if (rs.getString(CUR_VCHTIPOEJECUCION) != null) {
-            s.setTipoEjecucion(rs.getString(CUR_VCHTIPOEJECUCION));
-            logger.debug("CUR_VCHTIPOEJECUCION : " + rs.getString(CUR_VCHTIPOEJECUCION));
-        }
-        
         return s;
     }
 }
