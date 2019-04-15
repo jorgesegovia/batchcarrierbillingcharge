@@ -14,9 +14,10 @@ import org.apache.log4j.Logger;
 
 import com.google.gson.Gson;
 
+import pe.com.entel.aplicacion.carrierbilling.domain.ActualizacionProgramada;
 import pe.com.entel.aplicacion.carrierbilling.domain.ApiManagementError;
 import pe.com.entel.aplicacion.carrierbilling.domain.HeaderRequest;
-import pe.com.entel.aplicacion.carrierbilling.domain.Suscripcion;
+import pe.com.entel.aplicacion.carrierbilling.domain.Respuesta;
 import pe.com.entel.aplicacion.carrierbilling.domain.Token;
 import pe.com.entel.aplicacion.carrierbilling.domain.TokenError;
 import pe.com.entel.aplicacion.carrierbilling.exception.ApiManagementException;
@@ -60,28 +61,31 @@ public class LimpiarCacheService {
 
 	}
 
-	public void ejecutar(Suscripcion s) throws Exception {
-		
+	public Respuesta ejecutar(ActualizacionProgramada s) throws Exception {
+		Respuesta respuesta = new Respuesta();
 		try {
-			logger.info("Actualizando suscripcion [ " + s.getIdSuscripcion() + " ] ....");
+			logger.info("Limpiando cache suscripcion [ " + s.getIdSuscripcion() + " ] ....");
 			ArrayList<HeaderRequest> listaHeadersToken = obtenerHeadersToken();
 			String tokenJson = this.invocarRest(tokenUrl, tokenMetodo, listaHeadersToken, null);
 			logger.debug("tokenJson : " + tokenJson);
 			Gson gson = new Gson();
 			Token token = gson.fromJson(tokenJson, Token.class);
 			logger.info("Token concedido [ " + token.getAccess_token() + " ] ");
-
+			logger.info("Cuenta compartida [ " + s.getShareAccountId() + " ] ");
 			ArrayList<HeaderRequest> listaHeadersLimpiarCache = obtenerHeadersLimpiarCache(token.getAccess_token());
 			this.invocarRest(limpiarCacheUrl, limpiarCacheMetodo, listaHeadersLimpiarCache,
 					s.getShareAccountId());
-			logger.info("Actualizando suscripcion ...");
+			logger.info("Limpiando cache ...");
 			logger.info("Limpiar cache de suscripcion [ " + s.getIdSuscripcion() + " ] ejecutada correctamente!");
-			
+			respuesta.setCodigoRpta("0000");
 		} catch (ApiManagementException e) {
+			respuesta.setCodigoRpta(e.getError().getCodigoError());
+			respuesta.setMensaje(e.getError().getDescripcionError());
 			procedureError.run(e.getError(), s.getIdSuscripcion());
-			logger.info("Actualizacion de suscripcion [ " + s.getIdSuscripcion() + " ] con FALLO: " + e.getError());
+			logger.info("Limpiar cache de suscripcion [ " + s.getIdSuscripcion() + " ] con FALLO: " + respuesta);
 		}
-
+		logger.debug("Codigo de respuesta : " + respuesta.getCodigoRpta());
+		return respuesta;
 	}
 
 	private ArrayList<HeaderRequest> obtenerHeadersToken() {
@@ -126,7 +130,8 @@ public class LimpiarCacheService {
 				apiManagementError.setCodigoHttp(conn.getResponseCode());
 				apiManagementError.setCodigoError(tokenError.getResult().getCode());
 				apiManagementError.setDescripcionError(tokenError.getResult().getDescription());
-
+				apiManagementError.setServicio(cadenaUrl);
+				
 				logger.info("Codigo Error: " + apiManagementError.getCodigoError());
 				logger.info("Descripcion Error: " + apiManagementError.getDescripcionError());
 

@@ -39,4 +39,14 @@ public class ApiManagementError {
 		this.idCuentaCompartida = idCuentaCompartida;
 	}
 	
+	@Override
+    public String toString() {
+        return "ApiManagementError{" +
+                "servicio=" + servicio +
+                ", codigoError=" + codigoError +
+                ", descripcionError=" + descripcionError +
+                ", codigoHttp=" + codigoHttp +
+                ", idCuentaCompartida=" + idCuentaCompartida +
+                 '}';
+    }
 }

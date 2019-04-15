@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 
 import com.google.gson.Gson;
 
+import pe.com.entel.aplicacion.carrierbilling.domain.ActualizacionProgramada;
 import pe.com.entel.aplicacion.carrierbilling.domain.ActualizarCancelacionSp;
 import pe.com.entel.aplicacion.carrierbilling.domain.ApiManagementError;
 import pe.com.entel.aplicacion.carrierbilling.domain.HeaderRequest;
@@ -80,7 +81,11 @@ public class GestionTerminacionService {
 		if (CANAL_SPOTIFY.equals(s.getCanal())) {
 			this.ejecutarTerminacion(s);
 		} else {
-			limpiarCacheService.ejecutar(s);
+			ActualizacionProgramada ap = new ActualizacionProgramada();
+			ap.setIdSuscripcion(s.getIdSuscripcion());
+			ap.setShareAccountId(s.getShareAccountId());
+			ap.setCanal(s.getCanal());;
+			limpiarCacheService.ejecutar(ap);
 		}
 
 	}

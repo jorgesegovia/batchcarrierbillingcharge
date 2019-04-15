@@ -155,7 +155,6 @@ public class GestionCobroService {
             }
         }
 
-        codigoRespuestWs = "0000"; //eliminar
         s.setCodigorpta(codigoRespuestWs);
         s.setDescripcionrpta(descripcionRespuestaWs);
 
@@ -257,7 +256,6 @@ public class GestionCobroService {
         logger.info("CONFIRMACIOM Codigo -> [ " + codigoRespuestWs + " ]");
         logger.info("CONFIRMACION Mensaje -> [ " + StringUtils.left(descripcionRespuestaWs, 150) + " ]");
 
-        codigoRespuestWs = "0000";//eliminar
         s.setCodigorpta(codigoRespuestWs);
         s.setDescripcionrpta(descripcionRespuestaWs);
 

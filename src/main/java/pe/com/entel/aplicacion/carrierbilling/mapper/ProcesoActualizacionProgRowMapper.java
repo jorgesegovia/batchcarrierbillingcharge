@@ -6,30 +6,26 @@ import java.sql.SQLException;
 import org.apache.log4j.Logger;
 import org.springframework.jdbc.core.RowMapper;
 
-import pe.com.entel.aplicacion.carrierbilling.domain.Suscripcion;
+import pe.com.entel.aplicacion.carrierbilling.domain.ActualizacionProgramada;
 
-public class ProcesoActualizacionProgRowMapper implements RowMapper<Suscripcion>{
+public class ProcesoActualizacionProgRowMapper implements RowMapper<ActualizacionProgramada>{
 
     static Logger logger = Logger.getLogger(ProcesoActualizacionProgRowMapper.class);
 
     @Override
-    public Suscripcion mapRow(ResultSet rs, int i) throws SQLException {
+    public ActualizacionProgramada mapRow(ResultSet rs, int i) throws SQLException {
 
         logger.debug("ResultSet = " + rs);
         logger.debug("i = " + i);
 
-        Suscripcion s = new Suscripcion();
+        ActualizacionProgramada s = new ActualizacionProgramada();
 
-        if (rs.getInt("NUMIDSUSCRIPCION") != 0) {
-            s.setIdSuscripcion(rs.getInt("NUMIDSUSCRIPCION"));
+        if (rs.getInt("NUMIDSUSCRIPCIONACTPROG") != 0) {
+            s.setIdSuscripcionActProg(rs.getInt("NUMIDSUSCRIPCIONACTPROG"));
         }
 
-        if (rs.getString("VCHIDCUENTACOMPARTIDA") != null) {
-            s.setShareAccountId(rs.getString("VCHIDCUENTACOMPARTIDA"));
-        }
-
-        if (rs.getString("vchnombre") != null) {
-            s.setCanal(rs.getString("vchnombre"));
+        if (rs.getString("VCHESTADO") != null) {
+            s.setEstado(rs.getString("VCHESTADO"));
         }
         
         return s;

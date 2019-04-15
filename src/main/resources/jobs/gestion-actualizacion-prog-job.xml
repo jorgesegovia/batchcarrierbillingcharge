@@ -79,19 +79,20 @@
         <constructor-arg index="0" ref="jdbcTemplate"/>
         <constructor-arg index="1" value="${carbill.sp.procedure.actualizasuscripcion.fullname}"/>
         <constructor-arg index="2" value="${carbill.sp.procedure.actualizasuscripcion.inparam1}" />
-        <constructor-arg index="4" value="${carbill.sp.procedure.actualizasuscripcion.outparam2}" />
-        <constructor-arg index="5" value="${carbill.sp.procedure.actualizasuscripcion.outparam3}" />
-        <constructor-arg index="6" value="${carbill.sp.procedure.actualizasuscripcion.outparam4}" />
+        <constructor-arg index="3" value="${carbill.sp.procedure.actualizasuscripcion.outparam2}" />
+        <constructor-arg index="4" value="${carbill.sp.procedure.actualizasuscripcion.outparam3}" />
+        <constructor-arg index="5" value="${carbill.sp.procedure.actualizasuscripcion.outparam4}" />
+        <constructor-arg index="6" value="${carbill.sp.procedure.actualizasuscripcion.outparam5}" />
     </bean>
 
     <bean id="actualizaSuscripcionProgStoreProcedure"
           class="pe.com.entel.aplicacion.carrierbilling.repository.ActualizaSuscripcionProgStoreProcedure"
           scope="singleton" lazy-init="true">
         <constructor-arg index="0" ref="jdbcTemplate"/>
-        <constructor-arg index="1" value="${carbill.sp.procedure.actualizasuscripcion.fullname}"/>
-        <constructor-arg index="2" value="${carbill.sp.procedure.actualizasuscripcion.inparam1}" />
-        <constructor-arg index="4" value="${carbill.sp.procedure.actualizasuscripcion.outparam2}" />
-        <constructor-arg index="5" value="${carbill.sp.procedure.actualizasuscripcion.outparam3}" />
+        <constructor-arg index="1" value="${carbill.sp.procedure.actualizasuscripcionprog.fullname}"/>
+        <constructor-arg index="2" value="${carbill.sp.procedure.actualizasuscripcionprog.inparam1}" />
+        <constructor-arg index="3" value="${carbill.sp.procedure.actualizasuscripcionprog.outparam2}" />
+        <constructor-arg index="4" value="${carbill.sp.procedure.actualizasuscripcionprog.outparam3}" />
     </bean>
     
     <bean id="insertErrorCancelacionStoreProcedure"

@@ -6,10 +6,12 @@ public class ActualizaSuscripcionSp {
 
     private String mensaje;
     
-    private int idSuscripcionProgramada;
+    private int idSuscripcionActProg;
     
     private int idSuscripcion;
-
+     
+    private String idCuentaCompartida;
+    
 	public String getCodigoRpta() {
 		return codigoRpta;
 	}
@@ -26,12 +28,12 @@ public class ActualizaSuscripcionSp {
 		this.mensaje = mensaje;
 	}
 
-	public int getIdSuscripcionProgramada() {
-		return idSuscripcionProgramada;
+	public int getIdSuscripcionActProg() {
+		return idSuscripcionActProg;
 	}
 
-	public void setIdSuscripcionProgramada(int idSuscripcionProgramada) {
-		this.idSuscripcionProgramada = idSuscripcionProgramada;
+	public void setIdSuscripcionActProg(int idSuscripcionActProg) {
+		this.idSuscripcionActProg = idSuscripcionActProg;
 	}
 
 	public int getIdSuscripcion() {
@@ -42,5 +44,12 @@ public class ActualizaSuscripcionSp {
 		this.idSuscripcion = idSuscripcion;
 	}
 
+	public String getIdCuentaCompartida() {
+		return idCuentaCompartida;
+	}
 
+	public void setIdCuentaCompartida(String idCuentaCompartida) {
+		this.idCuentaCompartida = idCuentaCompartida;
+	}
+	
 }
